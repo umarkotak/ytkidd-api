@@ -16,6 +16,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/cron"
 	"github.com/umarkotak/ytkidd-api/datastore"
 	"github.com/umarkotak/ytkidd-api/handlers/ping_handler"
+	"github.com/umarkotak/ytkidd-api/handlers/youtube_channel_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_video_handler"
 	"github.com/umarkotak/ytkidd-api/model"
@@ -66,7 +67,7 @@ func main() {
 }
 
 func runServer() {
-	logrus.Infof("starting jodoh express backend")
+	logrus.Infof("starting ytkidd express backend")
 
 	initializeDependencies()
 
@@ -153,9 +154,9 @@ func initializeHttpServer() {
 
 		ri.Get("/ping", ping_handler.Ping)
 
-		ri.Get("/youtube_videos/home", youtube_video_handler.GetYoutubeVideosHome)
-		ri.Get("/youtube_channels", ping_handler.Ping)
-		ri.Get("/youtube_video/{id}", ping_handler.Ping)
+		ri.Get("/youtube_videos", youtube_video_handler.GetYoutubeVideos)
+		ri.Get("/youtube_video/{id}", youtube_video_handler.GetYoutubeVideoDetail)
+		ri.Get("/youtube_channels", youtube_channel_handler.GetYoutubeChannels)
 
 		ri.Post("/youtube/scrap_videos", youtube_handler.ScrapVideos)
 	})

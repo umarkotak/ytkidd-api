@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	REDIS_PREFIX                         = "JODOH_EXPRESS"     //
+	REDIS_PREFIX                         = "YTKIDDAPI"         //
 	OTP_VERIFICATION_EXPIRY              = 1 * time.Minute     //
 	UPDATE_PHONE_OTP_VERIFICATION_EXPIRY = 1 * time.Minute     //
 	INIT_PASS_VERIFICATION_EXPIRY        = 30 * time.Minute    //

@@ -53,7 +53,7 @@ var (
 			AND ytvid.deleted_at IS NULL
 	`, allColumns)
 
-	queryGetForHome = `
+	queryGetByParams = `
 		SELECT
 			ytvid.id AS id,
 			ytvid.external_id AS external_id,
@@ -78,6 +78,8 @@ var (
 			AND ytch.active
 			AND (:tags = '{}' OR ytch.tags @> :tags)
 			AND (:exclude_ids = '{}' OR ytvid.id != ANY(:exclude_ids))
+			AND (:exclude_channel_ids = '{}' OR ytch.id != ANY(:exclude_channel_ids))
+			AND (:channel_ids = '{}' OR ytch.id = ANY(:channel_ids))
 		ORDER BY RANDOM()
 		LIMIT :limit OFFSET :offset
 	`
@@ -124,7 +126,7 @@ var (
 	stmtGetByID         *sqlx.NamedStmt
 	stmtGetByExternalID *sqlx.NamedStmt
 	stmtGetForSearch    *sqlx.NamedStmt
-	stmtGetForHome      *sqlx.NamedStmt
+	stmtGetByParams     *sqlx.NamedStmt
 	stmtInsert          *sqlx.NamedStmt
 	stmtUpdate          *sqlx.NamedStmt
 	stmtSoftDelete      *sqlx.NamedStmt
@@ -145,7 +147,7 @@ func Initialize() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	stmtGetForHome, err = datastore.Get().Db.PrepareNamed(queryGetForHome)
+	stmtGetByParams, err = datastore.Get().Db.PrepareNamed(queryGetByParams)
 	if err != nil {
 		logrus.Fatal(err)
 	}

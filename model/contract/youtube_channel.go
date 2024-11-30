@@ -5,7 +5,7 @@ import (
 )
 
 type (
-	YoutubeChannelSearch struct {
+	GetYoutubeChannels struct {
 		Name string         `db:"name"`
 		Tags pq.StringArray `db:"tags"`
 	}

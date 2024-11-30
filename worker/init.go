@@ -22,8 +22,8 @@ var workerManager WorkerManager
 
 func Initialize(redisAddr, redisPwd string) error {
 	manager, err := goWorker.NewManager(goWorker.Options{
-		Namespace:          "JODOH_EXPRESS",
-		ManagerDisplayName: "JODOH_EXPRESS",
+		Namespace:          "YTKIDD",
+		ManagerDisplayName: "YTKIDD",
 		ServerAddr:         redisAddr,
 		Password:           redisPwd,
 		Database:           0,

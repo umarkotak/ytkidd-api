@@ -18,7 +18,7 @@ type (
 		ChatTokenJwtPrivateKey string
 		ChatTokenJwtPublicKey  string
 
-		InternalClientID  string // used for other internal service when calling jodoh-express-be service
+		InternalClientID  string // used for other internal service when calling ytkidd-express-be service
 		InternalSecretKey string //
 
 		DevInternalClientID  string // used manually for dev for internal dev related API

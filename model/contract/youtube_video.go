@@ -12,9 +12,11 @@ type (
 		Active bool           `db:"active"`
 	}
 
-	GetYoutubeVideosHome struct {
-		Tags       pq.StringArray `db:"tags"`
-		ExcludeIDs pq.Int64Array  `db:"exclude_ids"`
+	GetYoutubeVideos struct {
+		Tags              pq.StringArray `db:"tags"`
+		ChannelIDs        pq.Int64Array  `db:"channel_ids"`
+		ExcludeIDs        pq.Int64Array  `db:"exclude_ids"`
+		ExcludeChannelIDs pq.Int64Array  `db:"exclude_channel_ids"`
 		model.Pagination
 	}
 )

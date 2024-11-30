@@ -3,6 +3,7 @@ package youtube_service
 import (
 	"context"
 	"database/sql"
+	"html"
 
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/config"
@@ -50,8 +51,8 @@ func ScrapVideos(ctx context.Context, params contract.ScrapVideos) (string, erro
 		if youtubeChannel.ID == 0 {
 			youtubeChannel = model.YoutubeChannel{
 				ExternalID: params.ChannelID,
-				Name:       item.Snippet.ChannelTitle,
-				Username:   item.Snippet.ChannelTitle,
+				Name:       html.UnescapeString(item.Snippet.ChannelTitle),
+				Username:   html.UnescapeString(item.Snippet.ChannelTitle),
 				ImageUrl:   "",
 				Tags:       []string{},
 			}
@@ -75,7 +76,7 @@ func ScrapVideos(ctx context.Context, params contract.ScrapVideos) (string, erro
 		youtubeVideo = model.YoutubeVideo{
 			YoutubeChannelID: youtubeChannel.ID,
 			ExternalId:       item.Id.VideoId,
-			Title:            item.Snippet.Title,
+			Title:            html.UnescapeString(item.Snippet.Title),
 			ImageUrl:         item.Snippet.Thumbnails.Medium.Url,
 			Tags:             []string{},
 			Active:           true,

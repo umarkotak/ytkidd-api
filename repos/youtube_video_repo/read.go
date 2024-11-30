@@ -42,10 +42,10 @@ func GetForSearch(ctx context.Context, params contract.YoutubeVideoSearch) ([]mo
 	return objs, nil
 }
 
-func GetForHome(ctx context.Context, params contract.GetYoutubeVideosHome) ([]model.YoutubeVideoDetailed, error) {
+func GetByParams(ctx context.Context, params contract.GetYoutubeVideos) ([]model.YoutubeVideoDetailed, error) {
 	params.SetDefault()
 	objs := []model.YoutubeVideoDetailed{}
-	err := stmtGetForHome.SelectContext(ctx, &objs, params)
+	err := stmtGetByParams.SelectContext(ctx, &objs, params)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return objs, err

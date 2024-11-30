@@ -32,7 +32,7 @@ func GetByExternalID(ctx context.Context, externalID string) (model.YoutubeChann
 	return obj, nil
 }
 
-func GetForSearch(ctx context.Context, params contract.YoutubeChannelSearch) ([]model.YoutubeChannel, error) {
+func GetForSearch(ctx context.Context, params contract.GetYoutubeChannels) ([]model.YoutubeChannel, error) {
 	objs := []model.YoutubeChannel{}
 	err := stmtGetForSearch.SelectContext(ctx, &objs, params)
 	if err != nil {
