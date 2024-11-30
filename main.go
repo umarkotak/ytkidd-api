@@ -17,6 +17,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/datastore"
 	"github.com/umarkotak/ytkidd-api/handlers/ping_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_handler"
+	"github.com/umarkotak/ytkidd-api/handlers/youtube_video_handler"
 	"github.com/umarkotak/ytkidd-api/model"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_channel_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
@@ -152,8 +153,8 @@ func initializeHttpServer() {
 
 		ri.Get("/ping", ping_handler.Ping)
 
+		ri.Get("/youtube_videos/home", youtube_video_handler.GetYoutubeVideosHome)
 		ri.Get("/youtube_channels", ping_handler.Ping)
-		ri.Get("/youtube_videos", ping_handler.Ping)
 		ri.Get("/youtube_video/{id}", ping_handler.Ping)
 
 		ri.Post("/youtube/scrap_videos", youtube_handler.ScrapVideos)

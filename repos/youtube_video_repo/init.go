@@ -53,6 +53,35 @@ var (
 			AND ytvid.deleted_at IS NULL
 	`, allColumns)
 
+	queryGetForHome = `
+		SELECT
+			ytvid.id AS id,
+			ytvid.external_id AS external_id,
+			ytvid.title AS title,
+			ytvid.image_url AS image_url,
+			ytvid.tags AS tags,
+			ytvid.active AS active,
+			ytch.id AS youtube_channel_id,
+			ytch.external_id AS youtube_channel_external_id,
+			ytch.name AS youtube_channel_name,
+			ytch.username AS youtube_channel_username,
+			ytch.image_url AS youtube_channel_image_url,
+			ytch.tags AS youtube_channel_tags,
+			ytch.active AS youtube_channel_active
+		FROM youtube_videos ytvid
+		INNER JOIN youtube_channels ytch ON ytch.id = ytvid.youtube_channel_id
+		WHERE
+			1 = 1
+			AND ytvid.deleted_at IS NULL
+			AND ytch.deleted_at IS NULL
+			AND ytvid.active
+			AND ytch.active
+			AND (:tags = '{}' OR ytch.tags @> :tags)
+			AND (:exclude_ids = '{}' OR ytvid.id != ANY(:exclude_ids))
+		ORDER BY RANDOM()
+		LIMIT :limit OFFSET :offset
+	`
+
 	queryInsert = `
 		INSERT INTO youtube_videos (
 			youtube_channel_id,
@@ -95,6 +124,7 @@ var (
 	stmtGetByID         *sqlx.NamedStmt
 	stmtGetByExternalID *sqlx.NamedStmt
 	stmtGetForSearch    *sqlx.NamedStmt
+	stmtGetForHome      *sqlx.NamedStmt
 	stmtInsert          *sqlx.NamedStmt
 	stmtUpdate          *sqlx.NamedStmt
 	stmtSoftDelete      *sqlx.NamedStmt
@@ -112,6 +142,10 @@ func Initialize() {
 		logrus.Fatal(err)
 	}
 	stmtGetForSearch, err = datastore.Get().Db.PrepareNamed(queryGetForSearch)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	stmtGetForHome, err = datastore.Get().Db.PrepareNamed(queryGetForHome)
 	if err != nil {
 		logrus.Fatal(err)
 	}

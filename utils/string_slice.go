@@ -18,3 +18,11 @@ func SliceStringContain(strs []string, str string) bool {
 	}
 	return false
 }
+
+func SliceStringMustInt64(strs []string) []int64 {
+	res := []int64{}
+	for _, str := range strs {
+		res = append(res, StringMustInt64(str))
+	}
+	return res
+}

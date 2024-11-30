@@ -2,6 +2,7 @@ package utils
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -26,4 +27,22 @@ func StringMustDate(s string) time.Time {
 		logrus.Error(err)
 	}
 	return t
+}
+
+func StringMustSliceString(s, sep string) []string {
+	if s == "" {
+		return []string{}
+	}
+
+	return strings.Split(s, sep)
+}
+
+func StringMustSliceInt64(s, sep string) []int64 {
+	if s == "" {
+		return []int64{}
+	}
+
+	strs := strings.Split(s, sep)
+
+	return SliceStringMustInt64(strs)
 }

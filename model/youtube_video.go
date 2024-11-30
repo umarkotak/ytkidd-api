@@ -20,4 +20,20 @@ type (
 		Tags             pq.StringArray `db:"tags"`
 		Active           bool           `db:"active"`
 	}
+
+	YoutubeVideoDetailed struct {
+		ID                       int64          `db:"id"`
+		ExternalId               string         `db:"external_id"`
+		Title                    string         `db:"title"`
+		ImageUrl                 string         `db:"image_url"`
+		Tags                     pq.StringArray `db:"tags"`
+		Active                   bool           `db:"active"`
+		YoutubeChannelID         int64          `db:"youtube_channel_id"`
+		YoutubeChannelExternalID string         `db:"youtube_channel_external_id"`
+		YoutubeChannelName       string         `db:"youtube_channel_name"`
+		YoutubeChannelUsername   string         `db:"youtube_channel_username"`
+		YoutubeChannelImageUrl   string         `db:"youtube_channel_image_url"`
+		YoutubeChannelTags       pq.StringArray `db:"youtube_channel_tags"`
+		YoutubeChannelActive     bool           `db:"youtube_channel_active"`
+	}
 )
