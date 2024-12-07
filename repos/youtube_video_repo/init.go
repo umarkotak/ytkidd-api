@@ -78,7 +78,7 @@ var (
 			AND ytch.active
 			AND (:tags = '{}' OR ytch.tags @> :tags)
 			AND (:exclude_ids = '{}' OR ytvid.id != ANY(:exclude_ids))
-			AND (:exclude_channel_ids = '{}' OR ytch.id != ANY(:exclude_channel_ids))
+			AND (:exclude_channel_ids = '{}' OR NOT(ytch.id = ANY(:exclude_channel_ids)))
 			AND (:channel_ids = '{}' OR ytch.id = ANY(:channel_ids))
 		ORDER BY RANDOM()
 		LIMIT :limit OFFSET :offset

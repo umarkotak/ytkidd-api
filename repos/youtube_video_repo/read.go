@@ -44,6 +44,20 @@ func GetForSearch(ctx context.Context, params contract.YoutubeVideoSearch) ([]mo
 
 func GetByParams(ctx context.Context, params contract.GetYoutubeVideos) ([]model.YoutubeVideoDetailed, error) {
 	params.SetDefault()
+	if params.Tags == nil {
+		params.Tags = []string{}
+	}
+	if params.ChannelIDs == nil {
+		params.ChannelIDs = []int64{}
+	}
+	if params.ExcludeIDs == nil {
+		params.ExcludeIDs = []int64{}
+	}
+	if params.ExcludeChannelIDs == nil {
+		params.ExcludeChannelIDs = []int64{}
+	}
+
+	logrus.Infof("PARAMS: %+v", params)
 	objs := []model.YoutubeVideoDetailed{}
 	err := stmtGetByParams.SelectContext(ctx, &objs, params)
 	if err != nil {

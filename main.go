@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
@@ -139,12 +138,13 @@ func initializeHttpServer() {
 	r := chi.NewRouter()
 
 	r.Use(
-		chiMiddleware.RequestID,                       //
-		chiMiddleware.RealIP,                          //
-		chiMiddleware.Recoverer,                       //
-		middlewares.RequestLog,                        //
-		middlewares.CommonCtx,                         // it will extract headers and put the value to common context
-		middlewares.ReqRateLimit(1000, 1*time.Second), // max 100 request per second based on X-Device-Id
+		chiMiddleware.RequestID, //
+		chiMiddleware.RealIP,    //
+		chiMiddleware.Recoverer, //
+		middlewares.Cors,        //
+		middlewares.RequestLog,  //
+		middlewares.CommonCtx,   // it will extract headers and put the value to common context
+		// middlewares.ReqRateLimit(1000, 1*time.Second), // max 100 request per second based on X-Device-Id
 	)
 
 	r.Route("/ytkidd/api", func(ri chi.Router) {
@@ -157,6 +157,7 @@ func initializeHttpServer() {
 		ri.Get("/youtube_videos", youtube_video_handler.GetYoutubeVideos)
 		ri.Get("/youtube_video/{id}", youtube_video_handler.GetYoutubeVideoDetail)
 		ri.Get("/youtube_channels", youtube_channel_handler.GetYoutubeChannels)
+		ri.Get("/youtube_channel/{id}", youtube_channel_handler.GetYoutubeChannelDetail)
 
 		ri.Post("/youtube/scrap_videos", youtube_handler.ScrapVideos)
 	})

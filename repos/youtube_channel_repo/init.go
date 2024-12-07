@@ -49,6 +49,7 @@ var (
 			1 = 1
 			AND (:name = '' OR ytch.name = :name)
 			AND (:tags = '{}' OR ytch.tags @> :tags)
+			AND ytch.active
 			AND ytch.deleted_at IS NULL
 	`, allColumns)
 
