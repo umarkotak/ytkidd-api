@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS file_bucket;
 DROP TABLE IF EXISTS book_contents;
 DROP TABLE IF EXISTS books;
 DROP TABLE IF EXISTS worksheet_contents;

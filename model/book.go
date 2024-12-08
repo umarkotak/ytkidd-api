@@ -15,10 +15,10 @@ type (
 		DeletedAt     sql.NullTime   `db:"deleted_at"`
 		Title         string         `db:"title"`
 		Description   string         `db:"description"`
-		CoverImageUrl string         `db:"cover_image_url"`
+		CoverFileGuid string         `db:"cover_file_guid"`
 		Tags          pq.StringArray `db:"tags"`
 		Type          string         `db:"type"`
-		PdfFileUrl    string         `db:"pdf_file_url"`
+		PdfFileGuid   string         `db:"pdf_file_guid"`
 		Active        bool           `db:"active"`
 	}
 )

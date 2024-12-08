@@ -1,4 +1,4 @@
-package book_repo
+package book_content_repo
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/model"
 )
 
-func Insert(ctx context.Context, tx *sqlx.Tx, book model.Book) (int64, error) {
+func Insert(ctx context.Context, tx *sqlx.Tx, bookContent model.BookContent) (int64, error) {
 	var err error
 	newID := int64(0)
 
@@ -21,7 +21,7 @@ func Insert(ctx context.Context, tx *sqlx.Tx, book model.Book) (int64, error) {
 		}
 	}
 
-	err = stmt.GetContext(ctx, &newID, book)
+	err = stmt.GetContext(ctx, &newID, bookContent)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return newID, err
@@ -30,7 +30,7 @@ func Insert(ctx context.Context, tx *sqlx.Tx, book model.Book) (int64, error) {
 	return newID, nil
 }
 
-func Update(ctx context.Context, tx *sqlx.Tx, book model.Book) error {
+func Update(ctx context.Context, tx *sqlx.Tx, bookContent model.BookContent) error {
 	var err error
 
 	stmt := stmtUpdate
@@ -42,7 +42,7 @@ func Update(ctx context.Context, tx *sqlx.Tx, book model.Book) error {
 		}
 	}
 
-	_, err = stmt.ExecContext(ctx, book)
+	_, err = stmt.ExecContext(ctx, bookContent)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return err

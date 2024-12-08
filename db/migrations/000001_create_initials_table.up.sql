@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS worksheets (
   deleted_at TIMESTAMP WITH TIME ZONE,
 
   title TEXT NOT NULL,
-  image_url TEXT NOT NULL
+  cover_file_guid TEXT NOT NULL
 );
 ALTER SEQUENCE worksheets_id_seq RESTART WITH 1;
 
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS worksheet_contents (
 
   title TEXT NOT NULL,
   description TEXT NOT NULL,
-  image_url TEXT NOT NULL,
+  image_file_guid TEXT NOT NULL,
 
   CONSTRAINT fk_worksheet_id FOREIGN KEY (worksheet_id) REFERENCES worksheets(id)
 );
@@ -83,10 +83,10 @@ CREATE TABLE IF NOT EXISTS books (
 
   title TEXT NOT NULL,
   description TEXT NOT NULL,
-  cover_image_url TEXT NOT NULL,
+  cover_file_guid TEXT NOT NULL,
   tags TEXT [] NOT NULL DEFAULT '{}',
   type TEXT NOT NULL DEFAULT 'default',
-  pdf_file_url TEXT NULL,
+  pdf_file_guid TEXT NULL,
   active BOOLEAN NOT NULL DEFAULT TRUE
 );
 ALTER SEQUENCE books_id_seq RESTART WITH 1;
@@ -99,10 +99,27 @@ CREATE TABLE IF NOT EXISTS book_contents (
 
   book_id BIGINT NOT NULL,
 
-  image_url TEXT NOT NULL,
+  page_number BIGINT NOT NULL,
   description TEXT NOT NULL,
+  image_file_guid TEXT NOT NULL,
   metadata JSONB NOT NULL DEFAULT '{}',
 
   CONSTRAINT fk_book_id FOREIGN KEY (book_id) REFERENCES books(id)
 );
 ALTER SEQUENCE book_contents_id_seq RESTART WITH 1;
+
+CREATE TABLE IF NOT EXISTS file_bucket (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP WITH TIME ZONE,
+
+  guid TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  base_type TEXT NOT NULL,
+  extension TEXT NOT NULL,
+  http_content_type TEXT NOT NULL,
+  metadata JSONB NOT NULL DEFAULT '{}',
+  data BYTEA
+);
+ALTER SEQUENCE file_bucket_id_seq RESTART WITH 1;

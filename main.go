@@ -14,11 +14,16 @@ import (
 	"github.com/umarkotak/ytkidd-api/config"
 	"github.com/umarkotak/ytkidd-api/cron"
 	"github.com/umarkotak/ytkidd-api/datastore"
+	"github.com/umarkotak/ytkidd-api/handlers/book_handler"
+	"github.com/umarkotak/ytkidd-api/handlers/file_bucket_handler.go"
 	"github.com/umarkotak/ytkidd-api/handlers/ping_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_channel_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_video_handler"
 	"github.com/umarkotak/ytkidd-api/model"
+	"github.com/umarkotak/ytkidd-api/repos/book_content_repo"
+	"github.com/umarkotak/ytkidd-api/repos/book_repo"
+	"github.com/umarkotak/ytkidd-api/repos/file_bucket_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_channel_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
 	"github.com/umarkotak/ytkidd-api/utils/log_formatter"
@@ -126,8 +131,12 @@ func initializeDependencies() {
 		logrus.WithContext(context.TODO()).Error(err)
 	}
 
+	// Repositories
 	youtube_channel_repo.Initialize()
 	youtube_video_repo.Initialize()
+	book_repo.Initialize()
+	book_content_repo.Initialize()
+	file_bucket_repo.Initialize()
 
 	word_censor_lib.Initialize(word_censor_lib.WordCensorLib{
 		Words: []string{"kucing", "anjing", "gajah"},
@@ -160,6 +169,12 @@ func initializeHttpServer() {
 		ri.Get("/youtube_channel/{id}", youtube_channel_handler.GetYoutubeChannelDetail)
 
 		ri.Post("/youtube/scrap_videos", youtube_handler.ScrapVideos)
+
+		ri.Post("/books/insert_from_pdf", book_handler.InsertFromPdf)
+		ri.Post("/books", book_handler.GetBooks)
+		ri.Post("/book/{id}", book_handler.GetBookDetail)
+
+		ri.Get("/file_bucket/{guid}", file_bucket_handler.GetByGuid)
 	})
 
 	port := fmt.Sprintf(":%s", config.Get().AppPort)

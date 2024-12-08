@@ -1,4 +1,4 @@
-package book_repo
+package book_content_repo
 
 import (
 	"fmt"
@@ -11,73 +11,65 @@ import (
 
 var (
 	allColumns = strings.Join([]string{
-		"b.id",
-		"b.created_at",
-		"b.updated_at",
-		"b.deleted_at",
-		"b.title",
-		"b.description",
-		"b.cover_file_guid",
-		"b.tags",
-		"b.type",
-		"b.pdf_file_guid",
-		"b.active",
+		"bc.id",
+		"bc.created_at",
+		"bc.updated_at",
+		"bc.deleted_at",
+		"bc.book_id",
+		"bc.page_number",
+		"bc.image_file_guid",
+		"bc.description",
+		"bc.metadata",
 	}, ", ")
 
 	queryGetByID = fmt.Sprintf(`
 		SELECT
 			%s
-		FROM books b
+		FROM book_contents bc
 		WHERE
-			b.id = :id
-			AND b.deleted_at IS NULL
+			bc.id = :id
+			AND bc.deleted_at IS NULL
 	`, allColumns)
 
-	queryGetForSearch = fmt.Sprintf(`
+	queryGetByBookID = fmt.Sprintf(`
 		SELECT
 			%s
-		FROM books b
+		FROM book_contents bc
 		WHERE
-			1 = 1
-			AND (:title = '' OR b.title = :title)
-			AND (:tags = '{}' OR b.tags @> :tags)
-			AND (b.active = :active)
-			AND b.deleted_at IS NULL
+			bc.book_id = :book_id
+			AND bc.deleted_at IS NULL
 	`, allColumns)
 
 	queryInsert = `
-		INSERT INTO books (
-			title,
+		INSERT INTO book_contents (
+			book_id,
+			page_number,
+			image_file_guid,
 			description,
-			cover_file_guid,
-			tags,
-			type,
-			pdf_file_guid
+			metadata
 		) VALUES (
-			:title,
+			:book_id,
+			:page_number,
+			:image_file_guid,
 			:description,
-			:cover_file_guid,
-			:tags,
-			:type,
-			:pdf_file_guid
+			:metadata
 		) RETURNING id
 	`
 
 	queryUpdate = `
-		UPDATE books
+		UPDATE book_contents
 		SET
-			title = :title,
+			book_id = :book_id,
+			page_number = :page_number,
+			image_file_guid = :image_file_guid,
 			description = :description,
-			cover_file_guid = :cover_file_guid,
-			tags = :tags,
-			type = :type,
-			pdf_file_guid = :pdf_file_guid
+			metadata = :metadata
 		WHERE
 			id = :id
 	`
 
 	querySoftDelete = `
-		UPDATE books
+		UPDATE book_contents
 		SET
 			deleted_at = NOW()
 		WHERE
@@ -86,11 +78,11 @@ var (
 )
 
 var (
-	stmtGetByID      *sqlx.NamedStmt
-	stmtGetForSearch *sqlx.NamedStmt
-	stmtInsert       *sqlx.NamedStmt
-	stmtUpdate       *sqlx.NamedStmt
-	stmtSoftDelete   *sqlx.NamedStmt
+	stmtGetByID     *sqlx.NamedStmt
+	stmtGetByBookID *sqlx.NamedStmt
+	stmtInsert      *sqlx.NamedStmt
+	stmtUpdate      *sqlx.NamedStmt
+	stmtSoftDelete  *sqlx.NamedStmt
 )
 
 func Initialize() {
@@ -100,7 +92,7 @@ func Initialize() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	stmtGetForSearch, err = datastore.Get().Db.PrepareNamed(queryGetForSearch)
+	stmtGetByBookID, err = datastore.Get().Db.PrepareNamed(queryGetByBookID)
 	if err != nil {
 		logrus.Fatal(err)
 	}

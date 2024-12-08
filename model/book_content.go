@@ -10,14 +10,15 @@ import (
 
 type (
 	BookContent struct {
-		ID          int64               `db:"id"`
-		CreatedAt   time.Time           `db:"created_at"`
-		UpdatedAt   time.Time           `db:"updated_at"`
-		DeletedAt   sql.NullTime        `db:"deleted_at"`
-		BookID      int64               `db:"book_id"`
-		ImageUrl    string              `db:"image_url"`
-		Description string              `db:"description"`
-		Metadata    BookContentMetadata `db:"metadata"`
+		ID            int64               `db:"id"`
+		CreatedAt     time.Time           `db:"created_at"`
+		UpdatedAt     time.Time           `db:"updated_at"`
+		DeletedAt     sql.NullTime        `db:"deleted_at"`
+		BookID        int64               `db:"book_id"`
+		PageNumber    int64               `db:"page_number"`
+		ImageFileGuid string              `db:"image_file_guid"`
+		Description   string              `db:"description"`
+		Metadata      BookContentMetadata `db:"metadata"`
 	}
 
 	BookContentMetadata struct {
