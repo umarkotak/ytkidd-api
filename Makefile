@@ -5,7 +5,7 @@ migrate-up:
 	go run . migrate up
 
 build:
-	go build -o ytkidd-api cmd/web/main.go
+	go build -o ytkidd-api .
 
 rund:
 	nohup ./ytkidd-api &

@@ -16,12 +16,12 @@ func Initialize() {
 
 	config = Config{
 		AppEnv:            getEnvStringWithDefault("APP_ENV", "development"),
-		AppPort:           getEnvStringWithDefault("APP_PORT", "7070"),
+		AppPort:           getEnvStringWithDefault("APP_PORT", "33000"),
 		DbURL:             os.Getenv("DB_URL"),
 		DbTimezone:        getEnvStringWithDefault("DB_TIMEZONE", "Asia/Jakarta"),
 		RedisUrl:          os.Getenv("REDIS_URL"),
 		RedisPassword:     os.Getenv("REDIS_PASSWORD"),
-		ChatWebsocketHost: getEnvStringWithDefault("CHAT_WEBSOCKET_HOST", "ws://localhost:7070/jodoh-express/api/chat/websocket/connect"),
+		ChatWebsocketHost: getEnvStringWithDefault("CHAT_WEBSOCKET_HOST", "ws://localhost:33000/jodoh-express/api/chat/websocket/connect"),
 		YoutubeApiKey:     os.Getenv("YOUTUBE_API_KEY"),
 
 		JxAuthJwtPrivateKey: os.Getenv("JX_AUTH_JWT_PRIVATE_KEY"),
