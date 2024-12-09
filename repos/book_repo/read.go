@@ -5,6 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/model"
+	"github.com/umarkotak/ytkidd-api/model/contract"
 )
 
 func GetByID(ctx context.Context, id int64) (model.Book, error) {
@@ -19,9 +20,13 @@ func GetByID(ctx context.Context, id int64) (model.Book, error) {
 	return obj, nil
 }
 
-func GetForSearch(ctx context.Context, params map[string]any) ([]model.Book, error) {
+func GetByParams(ctx context.Context, params contract.GetBooks) ([]model.Book, error) {
+	if params.Tags == nil {
+		params.Tags = []string{}
+	}
+
 	objs := []model.Book{}
-	err := stmtGetForSearch.SelectContext(ctx, &objs, params)
+	err := stmtGetByParams.SelectContext(ctx, &objs, params)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return objs, err

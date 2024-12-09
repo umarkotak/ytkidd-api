@@ -4,6 +4,7 @@ type (
 	Config struct {
 		AppEnv            string // Enum: development, integration, production
 		AppPort           string //
+		AppHost           string //
 		DbURL             string //
 		DbTimezone        string //
 		RedisUrl          string //

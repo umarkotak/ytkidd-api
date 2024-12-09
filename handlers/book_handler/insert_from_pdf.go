@@ -1,6 +1,7 @@
 package book_handler
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -22,20 +23,52 @@ func InsertFromPdf(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pdfFile, _, err := r.FormFile("pdf_file")
-	if err != nil {
-		logrus.WithContext(ctx).Error(err)
-		render.Error(w, r, err, "")
-		return
-	}
-	defer pdfFile.Close()
-
-	pdfBytes, err := io.ReadAll(pdfFile)
-	if err != nil {
+	if err != nil && err != http.ErrMissingFile {
 		logrus.WithContext(ctx).Error(err)
 		render.Error(w, r, err, "")
 		return
 	}
 
+	pdfBytes := []byte{}
+	if pdfFile != nil {
+		defer pdfFile.Close()
+		pdfBytes, err = io.ReadAll(pdfFile)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			render.Error(w, r, err, "")
+			return
+		}
+	}
+
+	if r.FormValue("pdf_url") != "" {
+		httpClient := http.Client{}
+		resp, err := httpClient.Get(r.FormValue("pdf_url"))
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			render.Error(w, r, err, "")
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			logrus.WithContext(ctx).Error(err)
+			render.Error(w, r, err, "")
+			return
+		}
+
+		pdfBytes, err = io.ReadAll(resp.Body)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			render.Error(w, r, err, "")
+			return
+		}
+	}
+
+	if len(pdfBytes) == 0 {
+		err = fmt.Errorf("pdf bytes empty")
+		render.Error(w, r, err, "")
+		return
+	}
 	params := contract.InsertFromPdf{
 		Title:       r.FormValue("title"),
 		Description: r.FormValue("description"),

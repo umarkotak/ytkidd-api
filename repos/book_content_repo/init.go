@@ -38,6 +38,7 @@ var (
 		WHERE
 			bc.book_id = :book_id
 			AND bc.deleted_at IS NULL
+		ORDER BY bc.page_number ASC
 	`, allColumns)
 
 	queryInsert = `

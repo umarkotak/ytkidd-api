@@ -107,6 +107,10 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 				return err
 			}
 
+			if pageNum == 0 {
+				coverFileGuid = fileGuid
+			}
+
 			logrus.WithContext(ctx).Infof("success inserting image %v/%v", pageNum+1, doc.NumPage())
 		}
 

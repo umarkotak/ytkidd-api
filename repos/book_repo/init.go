@@ -33,7 +33,7 @@ var (
 			AND b.deleted_at IS NULL
 	`, allColumns)
 
-	queryGetForSearch = fmt.Sprintf(`
+	queryGetByParams = fmt.Sprintf(`
 		SELECT
 			%s
 		FROM books b
@@ -41,7 +41,8 @@ var (
 			1 = 1
 			AND (:title = '' OR b.title = :title)
 			AND (:tags = '{}' OR b.tags @> :tags)
-			AND (b.active = :active)
+			AND (:type = '' OR b.type = :type)
+			AND b.active
 			AND b.deleted_at IS NULL
 	`, allColumns)
 
@@ -86,11 +87,11 @@ var (
 )
 
 var (
-	stmtGetByID      *sqlx.NamedStmt
-	stmtGetForSearch *sqlx.NamedStmt
-	stmtInsert       *sqlx.NamedStmt
-	stmtUpdate       *sqlx.NamedStmt
-	stmtSoftDelete   *sqlx.NamedStmt
+	stmtGetByID     *sqlx.NamedStmt
+	stmtGetByParams *sqlx.NamedStmt
+	stmtInsert      *sqlx.NamedStmt
+	stmtUpdate      *sqlx.NamedStmt
+	stmtSoftDelete  *sqlx.NamedStmt
 )
 
 func Initialize() {
@@ -100,7 +101,7 @@ func Initialize() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	stmtGetForSearch, err = datastore.Get().Db.PrepareNamed(queryGetForSearch)
+	stmtGetByParams, err = datastore.Get().Db.PrepareNamed(queryGetByParams)
 	if err != nil {
 		logrus.Fatal(err)
 	}
