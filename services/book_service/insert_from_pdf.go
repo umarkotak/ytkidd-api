@@ -3,19 +3,21 @@ package book_service
 import (
 	"context"
 	"fmt"
+	"image/png"
 	"os"
 
 	"github.com/gen2brain/go-fitz"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/config"
 	"github.com/umarkotak/ytkidd-api/datastore"
 	"github.com/umarkotak/ytkidd-api/model"
 	"github.com/umarkotak/ytkidd-api/model/contract"
 	"github.com/umarkotak/ytkidd-api/repos/book_content_repo"
 	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/repos/file_bucket_repo"
-	"github.com/umarkotak/ytkidd-api/utils"
+	"github.com/umarkotak/ytkidd-api/utils/random"
 )
 
 func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
@@ -64,13 +66,26 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 				return err
 			}
 
+			guid := random.MustGenUUIDTimes(2)
+			filePath := fmt.Sprintf("%s/%s.png", config.Get().FileBucketPath, guid)
+			file, err := os.Create(filePath)
+			if err != nil {
+				panic(err)
+			}
+			defer file.Close()
+
+			err = png.Encode(file, img)
+			if err != nil {
+				panic(err)
+			}
+
 			extension := "png"
 			httpContentType := "image/png"
-			imageBytes, err := utils.ConvertImageToPNG(img)
-			if err != nil {
-				logrus.WithContext(ctx).Error(err)
-				return err
-			}
+			// imageBytes, err := utils.ConvertImageToPNG(img)
+			// if err != nil {
+			// 	logrus.WithContext(ctx).Error(err)
+			// 	return err
+			// }
 
 			// extension := "jpeg"
 			// httpContentType := "image/jpeg"
@@ -81,12 +96,14 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			// }
 
 			fileBucket := model.FileBucket{
+				Guid:            guid,
 				Name:            fmt.Sprintf("book %v - page %v", book.ID, pageNum+1),
 				BaseType:        "image",
 				Extension:       extension,
 				HttpContentType: httpContentType,
 				Metadata:        model.FileBucketMetadata{},
-				Data:            imageBytes,
+				Data:            []byte{},
+				ExactPath:       filePath,
 			}
 			_, fileGuid, err := file_bucket_repo.Insert(ctx, tx, fileBucket)
 			if err != nil {

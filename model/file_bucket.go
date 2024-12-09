@@ -21,6 +21,7 @@ type (
 		HttpContentType string             `db:"http_content_type"`
 		Metadata        FileBucketMetadata `db:"metadata"`
 		Data            []byte             `db:"data"`
+		ExactPath       string             `db:"exact_path"`
 	}
 
 	FileBucketMetadata struct {

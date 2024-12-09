@@ -13,7 +13,9 @@ func Insert(ctx context.Context, tx *sqlx.Tx, fileBucket model.FileBucket) (int6
 	var err error
 	newID := int64(0)
 
-	fileBucket.Guid = random.MustGenUUIDTimes(2)
+	if fileBucket.Guid == "" {
+		fileBucket.Guid = random.MustGenUUIDTimes(2)
+	}
 
 	stmt := stmtInsert
 	if tx != nil {

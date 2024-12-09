@@ -4,3 +4,4 @@
 vendor
 ytkidd-api
 nohup.out
+file_bucket/*.png

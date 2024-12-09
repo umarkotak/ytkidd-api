@@ -11,6 +11,7 @@ type (
 		RedisPassword     string //
 		ChatWebsocketHost string //
 		YoutubeApiKey     string //
+		FileBucketPath    string //
 
 		JxAuthJwtPrivateKey string // jx auth - used for generating auth
 		JxAuthJwtPublicKey  string // it will be jwt + jwe encryption

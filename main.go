@@ -177,6 +177,10 @@ func initializeHttpServer() {
 		ri.Get("/file_bucket/{guid}", file_bucket_handler.GetByGuid)
 	})
 
+	r.Get("/file_bucket/*", func(w http.ResponseWriter, r *http.Request) {
+		http.StripPrefix("/file_bucket", http.FileServer(http.Dir(config.Get().FileBucketPath))).ServeHTTP(w, r)
+	})
+
 	port := fmt.Sprintf(":%s", config.Get().AppPort)
 	logrus.Infof("running http server on port %s", port)
 

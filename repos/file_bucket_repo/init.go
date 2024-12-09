@@ -21,6 +21,7 @@ var (
 		"fb.extension",
 		"fb.http_content_type",
 		"fb.metadata",
+		"fb.exact_path",
 	}, ", ")
 
 	allColumnsWithData = strings.Join([]string{
@@ -34,6 +35,7 @@ var (
 		"fb.extension",
 		"fb.http_content_type",
 		"fb.metadata",
+		"fb.exact_path",
 		"fb.data",
 	}, ", ")
 
@@ -63,7 +65,8 @@ var (
 			extension,
 			http_content_type,
 			metadata,
-			data
+			data,
+			exact_path
 		) VALUES (
 			:guid,
 			:name,
@@ -71,7 +74,8 @@ var (
 			:extension,
 			:http_content_type,
 			:metadata,
-			:data
+			:data,
+			:exact_path
 		) RETURNING id
 	`
 
