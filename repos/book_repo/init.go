@@ -26,8 +26,10 @@ var (
 
 	queryGetByID = fmt.Sprintf(`
 		SELECT
-			%s
+			%s,
+			COALESCE(fb.exact_path, '') AS cover_file_path
 		FROM books b
+		LEFT JOIN file_bucket fb ON fb.guid = b.cover_file_guid
 		WHERE
 			b.id = :id
 			AND b.deleted_at IS NULL
@@ -35,8 +37,10 @@ var (
 
 	queryGetByParams = fmt.Sprintf(`
 		SELECT
-			%s
+			%s,
+			COALESCE(fb.exact_path, '') AS cover_file_path
 		FROM books b
+		LEFT JOIN file_bucket fb ON fb.guid = b.cover_file_guid
 		WHERE
 			1 = 1
 			AND (:title = '' OR b.title = :title)

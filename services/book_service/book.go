@@ -24,7 +24,7 @@ func GetBooks(ctx context.Context, params contract.GetBooks) (resp_contract.GetB
 			ID:           book.ID,
 			Title:        book.Title,
 			Description:  book.Description,
-			CoverFileUrl: utils.GenFileUrl(book.CoverFileGuid),
+			CoverFileUrl: utils.GenRawFileUrl(book.CoverFilePath),
 			Tags:         book.Tags,
 			Type:         book.Type,
 		}
@@ -55,7 +55,7 @@ func GetBookDetail(ctx context.Context, params contract.GetBooks) (resp_contract
 			ID:           bookContent.ID,
 			BookID:       bookContent.BookID,
 			PageNumber:   bookContent.PageNumber,
-			ImageFileUrl: utils.GenFileUrl(bookContent.ImageFileGuid),
+			ImageFileUrl: utils.GenRawFileUrl(bookContent.ImageFilePath),
 			Description:  bookContent.Description,
 		}
 
@@ -66,7 +66,7 @@ func GetBookDetail(ctx context.Context, params contract.GetBooks) (resp_contract
 		ID:           book.ID,
 		Title:        book.Title,
 		Description:  book.Description,
-		CoverFileUrl: utils.GenFileUrl(book.CoverFileGuid),
+		CoverFileUrl: utils.GenRawFileUrl(book.CoverFilePath),
 		Tags:         book.Tags,
 		Type:         book.Type,
 		Contents:     bookContentDatas,

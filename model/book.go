@@ -20,5 +20,7 @@ type (
 		Type          string         `db:"type"`
 		PdfFileGuid   string         `db:"pdf_file_guid"`
 		Active        bool           `db:"active"`
+
+		CoverFilePath string `db:"cover_file_path"` // join from file bucket
 	}
 )

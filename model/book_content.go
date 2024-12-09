@@ -19,6 +19,8 @@ type (
 		ImageFileGuid string              `db:"image_file_guid"`
 		Description   string              `db:"description"`
 		Metadata      BookContentMetadata `db:"metadata"`
+
+		ImageFilePath string `db:"image_file_path"`
 	}
 
 	BookContentMetadata struct {
