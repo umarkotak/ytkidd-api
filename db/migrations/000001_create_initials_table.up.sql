@@ -120,6 +120,7 @@ CREATE TABLE IF NOT EXISTS file_bucket (
   extension TEXT NOT NULL,
   http_content_type TEXT NOT NULL,
   metadata JSONB NOT NULL DEFAULT '{}',
-  data BYTEA
+  data BYTEA,
+  exact_path TEXT
 );
 ALTER SEQUENCE file_bucket_id_seq RESTART WITH 1;
