@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image/png"
 	"os"
+	"time"
 
 	"github.com/gen2brain/go-fitz"
 	"github.com/jmoiron/sqlx"
@@ -42,6 +43,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 	}
 	defer doc.Close()
 
+	successFilePaths := []string{}
 	err = datastore.Transaction(ctx, datastore.Get().Db, func(tx *sqlx.Tx) error {
 		book := model.Book{
 			Title:         params.Title,
@@ -67,17 +69,20 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			}
 
 			guid := random.MustGenUUIDTimes(2)
-			filePath := fmt.Sprintf("%s/%s.png", config.Get().FileBucketPath, guid)
+			filePath := fmt.Sprintf("%s/book_contents/%v_%s.png", config.Get().FileBucketPath, time.Now().UnixMilli(), guid)
 			file, err := os.Create(filePath)
 			if err != nil {
-				panic(err)
+				logrus.WithContext(ctx).Error(err)
+				return err
 			}
 			defer file.Close()
 
 			err = png.Encode(file, img)
 			if err != nil {
-				panic(err)
+				logrus.WithContext(ctx).Error(err)
+				return err
 			}
+			successFilePaths = append(successFilePaths, filePath)
 
 			extension := "png"
 			httpContentType := "image/png"
@@ -141,6 +146,16 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 		return nil
 	})
 	if err != nil {
+		// clean up successfully uploaded file
+		go func() {
+			for _, successFilePath := range successFilePaths {
+				err = os.Remove(successFilePath)
+				if err != nil {
+					logrus.WithContext(ctx).Error(err)
+				}
+			}
+		}()
+
 		logrus.WithContext(ctx).Error(err)
 		return err
 	}
