@@ -9,6 +9,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/model"
 	"github.com/umarkotak/ytkidd-api/model/contract"
 	"github.com/umarkotak/ytkidd-api/services/book_service"
+	"github.com/umarkotak/ytkidd-api/utils"
 	"github.com/umarkotak/ytkidd-api/utils/render"
 )
 
@@ -80,6 +81,66 @@ func InsertFromPdf(w http.ResponseWriter, r *http.Request) {
 		logrus.WithContext(ctx).Error(err)
 		render.Error(w, r, err, "")
 		return
+	}
+
+	render.Response(w, r, 200, nil)
+}
+
+func InsertFromPdfUrls(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	params := struct {
+		Books []contract.InsertFromPdfUrl `json:"books"`
+	}{}
+	err := utils.BindJson(r, &params)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	for _, oneParams := range params.Books {
+		if oneParams.PdfUrl == "" {
+			continue
+		}
+
+		httpClient := http.Client{}
+		resp, err := httpClient.Get(oneParams.PdfUrl)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			render.Error(w, r, err, "")
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			logrus.WithContext(ctx).Error(err)
+			render.Error(w, r, err, "")
+			return
+		}
+
+		pdfBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			render.Error(w, r, err, "")
+			return
+		}
+
+		if len(pdfBytes) == 0 {
+			continue
+		}
+
+		insertFromPdfParams := contract.InsertFromPdf{
+			Title:       oneParams.Title,
+			Description: oneParams.Description,
+			PdfBytes:    pdfBytes,
+		}
+		err = book_service.InsertFromPdf(ctx, insertFromPdfParams)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			render.Error(w, r, err, "")
+			return
+		}
 	}
 
 	render.Response(w, r, 200, nil)

@@ -171,6 +171,7 @@ func initializeHttpServer() {
 		ri.Post("/youtube/scrap_videos", youtube_handler.ScrapVideos)
 
 		ri.Post("/books/insert_from_pdf", book_handler.InsertFromPdf)
+		ri.Post("/books/insert_from_pdf_urls", book_handler.InsertFromPdfUrls)
 		ri.Get("/books", book_handler.GetBooks)
 		ri.Get("/book/{id}", book_handler.GetBookDetail)
 

@@ -9,6 +9,12 @@ type (
 		PdfBytes    []byte
 	}
 
+	InsertFromPdfUrl struct {
+		PdfUrl      string `json:"pdf_url"`
+		Title       string `json:"title"`
+		Description string `json:"description"`
+	}
+
 	GetBooks struct {
 		BookID int64          `db:"-"`
 		Title  string         `db:"title"`

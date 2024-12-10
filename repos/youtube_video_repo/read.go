@@ -57,7 +57,6 @@ func GetByParams(ctx context.Context, params contract.GetYoutubeVideos) ([]model
 		params.ExcludeChannelIDs = []int64{}
 	}
 
-	logrus.Infof("PARAMS: %+v", params)
 	objs := []model.YoutubeVideoDetailed{}
 	err := stmtGetByParams.SelectContext(ctx, &objs, params)
 	if err != nil {
