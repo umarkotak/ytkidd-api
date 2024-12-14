@@ -52,6 +52,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			bookType = params.BookType
 		}
 		book := model.Book{
+			Slug:           params.Slug,
 			Title:          params.Title,
 			Description:    params.Description,
 			CoverFileGuid:  "",

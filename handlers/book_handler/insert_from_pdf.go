@@ -71,6 +71,7 @@ func InsertFromPdf(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	params := contract.InsertFromPdf{
+		Slug:            r.FormValue("slug"),
 		Title:           r.FormValue("title"),
 		Description:     r.FormValue("description"),
 		PdfBytes:        pdfBytes,
@@ -134,6 +135,7 @@ func InsertFromPdfUrls(w http.ResponseWriter, r *http.Request) {
 		}
 
 		insertFromPdfParams := contract.InsertFromPdf{
+			Slug:            oneParams.Slug,
 			Title:           oneParams.Title,
 			Description:     oneParams.Description,
 			PdfBytes:        pdfBytes,

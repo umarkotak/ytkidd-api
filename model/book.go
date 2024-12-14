@@ -13,6 +13,7 @@ type (
 		CreatedAt      time.Time      `db:"created_at"`
 		UpdatedAt      time.Time      `db:"updated_at"`
 		DeletedAt      sql.NullTime   `db:"deleted_at"`
+		Slug           string         `db:"slug"`
 		Title          string         `db:"title"`
 		Description    string         `db:"description"`
 		CoverFileGuid  string         `db:"cover_file_guid"`

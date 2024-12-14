@@ -15,6 +15,7 @@ var (
 		"b.created_at",
 		"b.updated_at",
 		"b.deleted_at",
+		"b.slug",
 		"b.title",
 		"b.description",
 		"b.cover_file_guid",
@@ -53,6 +54,7 @@ var (
 
 	queryInsert = `
 		INSERT INTO books (
+			slug,
 			title,
 			description,
 			cover_file_guid,
@@ -61,6 +63,7 @@ var (
 			pdf_file_guid,
 			original_pdf_url
 		) VALUES (
+			:slug,
 			:title,
 			:description,
 			:cover_file_guid,
@@ -74,6 +77,7 @@ var (
 	queryUpdate = `
 		UPDATE books
 		SET
+			slug = :slug,
 			title = :title,
 			description = :description,
 			cover_file_guid = :cover_file_guid,

@@ -4,6 +4,7 @@ import "github.com/lib/pq"
 
 type (
 	InsertFromPdf struct {
+		Slug            string
 		Title           string
 		Description     string
 		PdfBytes        []byte
@@ -15,6 +16,7 @@ type (
 
 	InsertFromPdfUrl struct {
 		PdfUrl          string `json:"pdf_url"`
+		Slug            string `json:"slug"`
 		Title           string `json:"title"`
 		Description     string `json:"description"`
 		ImgFormat       string `json:"img_format"`
