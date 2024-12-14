@@ -52,13 +52,14 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			bookType = params.BookType
 		}
 		book := model.Book{
-			Title:         params.Title,
-			Description:   params.Description,
-			CoverFileGuid: "",
-			Tags:          pq.StringArray{},
-			Type:          bookType,
-			PdfFileGuid:   "",
-			Active:        true,
+			Title:          params.Title,
+			Description:    params.Description,
+			CoverFileGuid:  "",
+			Tags:           pq.StringArray{},
+			Type:           bookType,
+			PdfFileGuid:    "",
+			Active:         true,
+			OriginalPdfUrl: params.OriginalPdfUrl,
 		}
 		book.ID, err = book_repo.Insert(ctx, tx, book)
 		if err != nil {

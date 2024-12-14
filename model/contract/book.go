@@ -10,6 +10,7 @@ type (
 		ImgFormat       string
 		BookType        string
 		CustomImageSlug string
+		OriginalPdfUrl  string
 	}
 
 	InsertFromPdfUrl struct {

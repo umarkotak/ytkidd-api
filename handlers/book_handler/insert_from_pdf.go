@@ -140,6 +140,7 @@ func InsertFromPdfUrls(w http.ResponseWriter, r *http.Request) {
 			ImgFormat:       oneParams.ImgFormat,
 			BookType:        oneParams.BookType,
 			CustomImageSlug: oneParams.CustomImageSlug,
+			OriginalPdfUrl:  oneParams.PdfUrl,
 		}
 		err = book_service.InsertFromPdf(ctx, insertFromPdfParams)
 		if err != nil {

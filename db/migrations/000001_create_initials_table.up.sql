@@ -87,7 +87,8 @@ CREATE TABLE IF NOT EXISTS books (
   tags TEXT [] NOT NULL DEFAULT '{}',
   type TEXT NOT NULL DEFAULT 'default',
   pdf_file_guid TEXT NULL,
-  active BOOLEAN NOT NULL DEFAULT TRUE
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  original_pdf_url TEXT NULL
 );
 ALTER SEQUENCE books_id_seq RESTART WITH 1;
 
