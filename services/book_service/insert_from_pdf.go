@@ -3,6 +3,7 @@ package book_service
 import (
 	"context"
 	"fmt"
+	"image/jpeg"
 	"image/png"
 	"os"
 	"time"
@@ -18,6 +19,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/repos/book_content_repo"
 	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/repos/file_bucket_repo"
+	"github.com/umarkotak/ytkidd-api/utils"
 	"github.com/umarkotak/ytkidd-api/utils/random"
 )
 
@@ -45,16 +47,26 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 
 	successFilePaths := []string{}
 	err = datastore.Transaction(ctx, datastore.Get().Db, func(tx *sqlx.Tx) error {
+		bookType := "default"
+		if params.BookType != "" {
+			bookType = params.BookType
+		}
 		book := model.Book{
 			Title:         params.Title,
 			Description:   params.Description,
 			CoverFileGuid: "",
 			Tags:          pq.StringArray{},
-			Type:          "default",
+			Type:          bookType,
 			PdfFileGuid:   "",
 			Active:        true,
 		}
 		book.ID, err = book_repo.Insert(ctx, tx, book)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+
+		err = utils.CreateFolderIfNotExists(fmt.Sprintf("%s/book_contents", config.Get().FileBucketPath))
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
 			return err
@@ -68,8 +80,20 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 				return err
 			}
 
+			var extension, httpContentType string
+			if params.ImgFormat == "jpeg" {
+				extension = "jpeg"
+				httpContentType = "image/jpeg"
+			} else {
+				extension = "png"
+				httpContentType = "image/png"
+			}
+
 			guid := random.MustGenUUIDTimes(2)
-			filePath := fmt.Sprintf("%s/book_contents/%v_%s.png", config.Get().FileBucketPath, time.Now().UnixMilli(), guid)
+			if params.CustomImageSlug != "" {
+				guid = fmt.Sprintf("%v-%v", params.CustomImageSlug, pageNum)
+			}
+			filePath := fmt.Sprintf("%s/book_contents/%v_%s.%s", config.Get().FileBucketPath, time.Now().UnixMilli(), guid, extension)
 			file, err := os.Create(filePath)
 			if err != nil {
 				logrus.WithContext(ctx).Error(err)
@@ -77,28 +101,18 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			}
 			defer file.Close()
 
-			err = png.Encode(file, img)
+			if params.ImgFormat == "jpeg" {
+				err = jpeg.Encode(file, img, &jpeg.Options{
+					Quality: 90,
+				})
+			} else {
+				err = png.Encode(file, img)
+			}
 			if err != nil {
 				logrus.WithContext(ctx).Error(err)
 				return err
 			}
 			successFilePaths = append(successFilePaths, filePath)
-
-			extension := "png"
-			httpContentType := "image/png"
-			// imageBytes, err := utils.ConvertImageToPNG(img)
-			// if err != nil {
-			// 	logrus.WithContext(ctx).Error(err)
-			// 	return err
-			// }
-
-			// extension := "jpeg"
-			// httpContentType := "image/jpeg"
-			// imageBytes, err := utils.ConvertImageToJPEG(img, 80)
-			// if err != nil {
-			// 	logrus.WithContext(ctx).Error(err)
-			// 	return err
-			// }
 
 			fileBucket := model.FileBucket{
 				Guid:            guid,

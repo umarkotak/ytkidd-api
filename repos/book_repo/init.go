@@ -45,7 +45,7 @@ var (
 			1 = 1
 			AND (:title = '' OR b.title = :title)
 			AND (:tags = '{}' OR b.tags @> :tags)
-			AND (:type = '' OR b.type = :type)
+			AND (:types = '{}' OR b.type = ANY(:types))
 			AND b.active
 			AND b.deleted_at IS NULL
 	`, allColumns)

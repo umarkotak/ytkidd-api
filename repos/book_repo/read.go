@@ -24,6 +24,9 @@ func GetByParams(ctx context.Context, params contract.GetBooks) ([]model.Book, e
 	if params.Tags == nil {
 		params.Tags = []string{}
 	}
+	if params.Types == nil {
+		params.Types = []string{}
+	}
 
 	objs := []model.Book{}
 	err := stmtGetByParams.SelectContext(ctx, &objs, params)

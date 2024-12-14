@@ -14,7 +14,9 @@ import (
 func GetBooks(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	params := contract.GetBooks{}
+	params := contract.GetBooks{
+		Types: utils.StringMustSliceString(r.URL.Query().Get("types"), ","),
+	}
 
 	getBooks, err := book_service.GetBooks(ctx, params)
 	if err != nil {

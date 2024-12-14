@@ -71,9 +71,12 @@ func InsertFromPdf(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	params := contract.InsertFromPdf{
-		Title:       r.FormValue("title"),
-		Description: r.FormValue("description"),
-		PdfBytes:    pdfBytes,
+		Title:           r.FormValue("title"),
+		Description:     r.FormValue("description"),
+		PdfBytes:        pdfBytes,
+		ImgFormat:       r.FormValue("img_format"),
+		BookType:        r.FormValue("book_type"),
+		CustomImageSlug: r.FormValue("custom_image_slug"),
 	}
 
 	err = book_service.InsertFromPdf(ctx, params)
@@ -131,9 +134,12 @@ func InsertFromPdfUrls(w http.ResponseWriter, r *http.Request) {
 		}
 
 		insertFromPdfParams := contract.InsertFromPdf{
-			Title:       oneParams.Title,
-			Description: oneParams.Description,
-			PdfBytes:    pdfBytes,
+			Title:           oneParams.Title,
+			Description:     oneParams.Description,
+			PdfBytes:        pdfBytes,
+			ImgFormat:       oneParams.ImgFormat,
+			BookType:        oneParams.BookType,
+			CustomImageSlug: oneParams.CustomImageSlug,
 		}
 		err = book_service.InsertFromPdf(ctx, insertFromPdfParams)
 		if err != nil {
