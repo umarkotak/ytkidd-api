@@ -14,6 +14,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/config"
 	"github.com/umarkotak/ytkidd-api/cron"
 	"github.com/umarkotak/ytkidd-api/datastore"
+	"github.com/umarkotak/ytkidd-api/handlers/ai_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/book_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/file_bucket_handler.go"
 	"github.com/umarkotak/ytkidd-api/handlers/ping_handler"
@@ -24,7 +25,6 @@ import (
 	"github.com/umarkotak/ytkidd-api/repos/book_content_repo"
 	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/repos/file_bucket_repo"
-	"github.com/umarkotak/ytkidd-api/repos/ollama_api"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_channel_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
 	"github.com/umarkotak/ytkidd-api/utils/log_formatter"
@@ -177,6 +177,8 @@ func initializeHttpServer() {
 		ri.Get("/book/{id}", book_handler.GetBookDetail)
 		ri.Delete("/book/{id}", book_handler.DeleteBook)
 
+		ri.Post("/ai/chat", ai_handler.Chat)
+
 		ri.Get("/file_bucket/{guid}", file_bucket_handler.GetByGuid)
 	})
 
@@ -184,17 +186,10 @@ func initializeHttpServer() {
 		http.StripPrefix("/file_bucket", http.FileServer(http.Dir(config.Get().FileBucketPath))).ServeHTTP(w, r)
 	})
 
-	resp, err := ollama_api.SendPrompt(context.TODO(), ollama_api.PromptParams{
-		Prompt: "kamu siapa dan bisa apa?",
-	})
-	logrus.WithFields(logrus.Fields{
-		"resp": resp,
-	}).Infof("%v", err)
-
 	port := fmt.Sprintf(":%s", config.Get().AppPort)
 	logrus.Infof("running http server on port %s", port)
 
-	err = http.ListenAndServe(port, r)
+	err := http.ListenAndServe(port, r)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err.Error(),

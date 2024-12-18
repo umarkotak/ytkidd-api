@@ -12,8 +12,8 @@ import (
 	"github.com/umarkotak/ytkidd-api/config"
 )
 
-func SendPrompt(ctx context.Context, params PromptParams) (PromptResponse, error) {
-	ollamaURL := fmt.Sprintf("%s/api/generate", config.Get().OllamaHost)
+func SendChat(ctx context.Context, params ChatParams) (ChatResponse, error) {
+	ollamaURL := fmt.Sprintf("%s/api/chat", config.Get().OllamaHost)
 
 	params.Stream = false
 	if params.Model == "" {
@@ -23,13 +23,13 @@ func SendPrompt(ctx context.Context, params PromptParams) (PromptResponse, error
 	requestBody, err := json.Marshal(params)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return PromptResponse{}, err
+		return ChatResponse{}, err
 	}
 
 	req, err := http.NewRequest("POST", ollamaURL, bytes.NewBuffer(requestBody))
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return PromptResponse{}, err
+		return ChatResponse{}, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 
@@ -37,14 +37,14 @@ func SendPrompt(ctx context.Context, params PromptParams) (PromptResponse, error
 	resp, err := client.Do(req)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return PromptResponse{}, err
+		return ChatResponse{}, err
 	}
 	defer resp.Body.Close()
 
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return PromptResponse{}, err
+		return ChatResponse{}, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -52,17 +52,17 @@ func SendPrompt(ctx context.Context, params PromptParams) (PromptResponse, error
 		logrus.WithContext(ctx).WithFields(logrus.Fields{
 			"response_body": string(bodyBytes),
 		}).Error(err)
-		return PromptResponse{}, err
+		return ChatResponse{}, err
 	}
 
-	promptResponse := PromptResponse{}
-	err = json.Unmarshal(bodyBytes, &promptResponse)
+	chatResponse := ChatResponse{}
+	err = json.Unmarshal(bodyBytes, &chatResponse)
 	if err != nil {
 		logrus.WithContext(ctx).WithFields(logrus.Fields{
 			"response_body": string(bodyBytes),
 		}).Error(err)
-		return PromptResponse{}, err
+		return ChatResponse{}, err
 	}
 
-	return promptResponse, nil
+	return chatResponse, nil
 }
