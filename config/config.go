@@ -25,6 +25,7 @@ func Initialize() {
 		ChatWebsocketHost: getEnvStringWithDefault("CHAT_WEBSOCKET_HOST", "ws://localhost:33000/jodoh-express/api/chat/websocket/connect"),
 		YoutubeApiKey:     os.Getenv("YOUTUBE_API_KEY"),
 		FileBucketPath:    getEnvStringWithDefault("FILE_BUCKET_PATH", "file_bucket"),
+		OllamaHost:        getEnvStringWithDefault("OLLAMA_HOST", "http://localhost:11434"),
 
 		JxAuthJwtPrivateKey: os.Getenv("JX_AUTH_JWT_PRIVATE_KEY"),
 		JxAuthJwtPublicKey:  os.Getenv("JX_AUTH_JWT_PUBLIC_KEY"),

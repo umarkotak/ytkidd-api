@@ -24,6 +24,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/repos/book_content_repo"
 	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/repos/file_bucket_repo"
+	"github.com/umarkotak/ytkidd-api/repos/ollama_api"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_channel_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
 	"github.com/umarkotak/ytkidd-api/utils/log_formatter"
@@ -71,7 +72,7 @@ func main() {
 }
 
 func runServer() {
-	logrus.Infof("starting ytkidd express backend")
+	logrus.Infof("starting ytkidd backend")
 
 	initializeDependencies()
 
@@ -183,10 +184,17 @@ func initializeHttpServer() {
 		http.StripPrefix("/file_bucket", http.FileServer(http.Dir(config.Get().FileBucketPath))).ServeHTTP(w, r)
 	})
 
+	resp, err := ollama_api.SendPrompt(context.TODO(), ollama_api.PromptParams{
+		Prompt: "kamu siapa dan bisa apa?",
+	})
+	logrus.WithFields(logrus.Fields{
+		"resp": resp,
+	}).Infof("%v", err)
+
 	port := fmt.Sprintf(":%s", config.Get().AppPort)
 	logrus.Infof("running http server on port %s", port)
 
-	err := http.ListenAndServe(port, r)
+	err = http.ListenAndServe(port, r)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"error": err.Error(),
