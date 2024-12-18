@@ -174,6 +174,7 @@ func initializeHttpServer() {
 		ri.Post("/books/insert_from_pdf_urls", book_handler.InsertFromPdfUrls)
 		ri.Get("/books", book_handler.GetBooks)
 		ri.Get("/book/{id}", book_handler.GetBookDetail)
+		ri.Delete("/book/{id}", book_handler.DeleteBook)
 
 		ri.Get("/file_bucket/{guid}", file_bucket_handler.GetByGuid)
 	})

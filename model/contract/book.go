@@ -30,4 +30,8 @@ type (
 		Tags   pq.StringArray `db:"tags"`
 		Types  pq.StringArray `db:"types"`
 	}
+
+	DeleteBook struct {
+		BookID int64 `db:"id"`
+	}
 )

@@ -57,6 +57,15 @@ var (
 			AND fb.deleted_at IS NULL
 	`, allColumnsWithData)
 
+	queryGetByGuids = fmt.Sprintf(`
+		SELECT
+			%s
+		FROM file_bucket fb
+		WHERE
+			fb.guid = ANY(:guids)
+			AND fb.deleted_at IS NULL
+	`, allColumnsWithData)
+
 	queryInsert = `
 		INSERT INTO file_bucket (
 			guid,
@@ -92,14 +101,22 @@ var (
 		WHERE
 			id = :id
 	`
+
+	queryDeleteByGuids = `
+		DELETE FROM file_bucket
+		WHERE
+			guid = ANY(:guids)
+	`
 )
 
 var (
-	stmtGetByID    *sqlx.NamedStmt
-	stmtGetByGuid  *sqlx.NamedStmt
-	stmtInsert     *sqlx.NamedStmt
-	stmtSoftDelete *sqlx.NamedStmt
-	stmtDelete     *sqlx.NamedStmt
+	stmtGetByID       *sqlx.NamedStmt
+	stmtGetByGuid     *sqlx.NamedStmt
+	stmtGetByGuids    *sqlx.NamedStmt
+	stmtInsert        *sqlx.NamedStmt
+	stmtSoftDelete    *sqlx.NamedStmt
+	stmtDelete        *sqlx.NamedStmt
+	stmtDeleteByGuids *sqlx.NamedStmt
 )
 
 func Initialize() {
@@ -113,6 +130,10 @@ func Initialize() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
+	stmtGetByGuids, err = datastore.Get().Db.PrepareNamed(queryGetByGuids)
+	if err != nil {
+		logrus.Fatal(err)
+	}
 	stmtInsert, err = datastore.Get().Db.PrepareNamed(queryInsert)
 	if err != nil {
 		logrus.Fatal(err)
@@ -122,6 +143,10 @@ func Initialize() {
 		logrus.Fatal(err)
 	}
 	stmtDelete, err = datastore.Get().Db.PrepareNamed(queryDelete)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	stmtDeleteByGuids, err = datastore.Get().Db.PrepareNamed(queryDeleteByGuids)
 	if err != nil {
 		logrus.Fatal(err)
 	}

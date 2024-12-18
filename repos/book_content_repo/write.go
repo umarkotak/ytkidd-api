@@ -73,3 +73,26 @@ func SoftDelete(ctx context.Context, tx *sqlx.Tx, id int64) error {
 
 	return nil
 }
+
+func DeleteByBookID(ctx context.Context, tx *sqlx.Tx, bookID int64) error {
+	var err error
+
+	stmt := stmtDeleteByBookID
+	if tx != nil {
+		stmt, err = tx.PrepareNamedContext(ctx, queryDeleteByBookID)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+	}
+
+	_, err = stmt.ExecContext(ctx, map[string]any{
+		"book_id": bookID,
+	})
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	return nil
+}

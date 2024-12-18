@@ -51,6 +51,7 @@ var (
 			AND (:tags = '{}' OR ytch.tags @> :tags)
 			AND ytch.active
 			AND ytch.deleted_at IS NULL
+		ORDER BY ytch.name ASC
 	`, allColumns)
 
 	queryInsert = `

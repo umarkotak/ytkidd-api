@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/model"
 	"github.com/umarkotak/ytkidd-api/utils/random"
@@ -33,4 +34,27 @@ func Insert(ctx context.Context, tx *sqlx.Tx, fileBucket model.FileBucket) (int6
 	}
 
 	return newID, fileBucket.Guid, nil
+}
+
+func DeleteByGuids(ctx context.Context, tx *sqlx.Tx, guids pq.StringArray) error {
+	var err error
+
+	stmt := stmtDeleteByGuids
+	if tx != nil {
+		stmt, err = tx.PrepareNamedContext(ctx, queryDeleteByGuids)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+	}
+
+	_, err = stmt.ExecContext(ctx, map[string]any{
+		"guids": guids,
+	})
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	return nil
 }

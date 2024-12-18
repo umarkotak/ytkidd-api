@@ -31,3 +31,16 @@ func GenFileUrl(guid string) string {
 func GenRawFileUrl(fileBucketPath string) string {
 	return fmt.Sprintf("%s/%s", config.Get().AppHost, fileBucketPath)
 }
+
+func DeleteFileIfExists(filePath string) error {
+	err := os.Remove(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// File doesn't exist, which is fine.
+			return nil
+		}
+		// Some other error occurred during deletion.
+		return err
+	}
+	return nil
+}

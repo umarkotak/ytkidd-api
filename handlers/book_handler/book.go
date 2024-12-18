@@ -44,3 +44,20 @@ func GetBookDetail(w http.ResponseWriter, r *http.Request) {
 
 	render.Response(w, r, 200, bookDetail)
 }
+
+func DeleteBook(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	params := contract.DeleteBook{
+		BookID: utils.StringMustInt64(chi.URLParam(r, "id")),
+	}
+
+	err := book_service.DeleteBook(ctx, params)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	render.Response(w, r, 200, nil)
+}
