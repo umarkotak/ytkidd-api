@@ -16,6 +16,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/datastore"
 	"github.com/umarkotak/ytkidd-api/handlers/ai_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/book_handler"
+	"github.com/umarkotak/ytkidd-api/handlers/comfy_ui_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/file_bucket_handler.go"
 	"github.com/umarkotak/ytkidd-api/handlers/ping_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_channel_handler"
@@ -177,6 +178,7 @@ func initializeHttpServer() {
 		ri.Get("/book/{id}", book_handler.GetBookDetail)
 		ri.Delete("/book/{id}", book_handler.DeleteBook)
 
+		ri.Get("/comfy_ui/output", comfy_ui_handler.Gallery)
 		ri.Post("/ai/chat", ai_handler.Chat)
 
 		ri.Get("/file_bucket/{guid}", file_bucket_handler.GetByGuid)
@@ -186,7 +188,7 @@ func initializeHttpServer() {
 		http.StripPrefix("/file_bucket", http.FileServer(http.Dir(config.Get().FileBucketPath))).ServeHTTP(w, r)
 	})
 	r.Get("/comfy_ui_gallery/*", func(w http.ResponseWriter, r *http.Request) {
-		http.StripPrefix("/comfy_ui_gallery", http.FileServer(http.Dir("/Users/umar/umar/personal_project/dev-notes/local_app/ComfyUI/output"))).ServeHTTP(w, r)
+		http.StripPrefix("/comfy_ui_gallery", http.FileServer(http.Dir(config.Get().ComfyUIOutputDir))).ServeHTTP(w, r)
 	})
 
 	port := fmt.Sprintf(":%s", config.Get().AppPort)

@@ -13,6 +13,7 @@ type (
 		YoutubeApiKey     string //
 		FileBucketPath    string //
 		OllamaHost        string //
+		ComfyUIOutputDir  string
 
 		JxAuthJwtPrivateKey string // jx auth - used for generating auth
 		JxAuthJwtPublicKey  string // it will be jwt + jwe encryption
