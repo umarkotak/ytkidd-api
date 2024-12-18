@@ -185,6 +185,9 @@ func initializeHttpServer() {
 	r.Get("/file_bucket/*", func(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/file_bucket", http.FileServer(http.Dir(config.Get().FileBucketPath))).ServeHTTP(w, r)
 	})
+	r.Get("/comfy_ui_gallery/*", func(w http.ResponseWriter, r *http.Request) {
+		http.StripPrefix("/comfy_ui_gallery", http.FileServer(http.Dir("/Users/umar/umar/personal_project/dev-notes/local_app/ComfyUI/output"))).ServeHTTP(w, r)
+	})
 
 	port := fmt.Sprintf(":%s", config.Get().AppPort)
 	logrus.Infof("running http server on port %s", port)
