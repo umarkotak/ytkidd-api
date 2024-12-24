@@ -3,12 +3,11 @@ package book_service
 import (
 	"context"
 	"fmt"
-	"image/jpeg"
-	"image/png"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"time"
 
-	"github.com/gen2brain/go-fitz"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -24,26 +23,19 @@ import (
 )
 
 func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
-	tempDir, err := os.MkdirTemp("", "pdf-images-")
+	tempDir, err := os.MkdirTemp("", "pdf-images")
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return err
 	}
 	defer os.RemoveAll(tempDir)
 
-	tempPDFPath := fmt.Sprintf("%s/uploaded.pdf", tempDir)
+	tempPDFPath := fmt.Sprintf("%s/uploaded-%v.pdf", tempDir, params.Slug)
 	err = os.WriteFile(tempPDFPath, params.PdfBytes, 0644)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return err
 	}
-
-	doc, err := fitz.New(tempPDFPath)
-	if err != nil {
-		logrus.WithContext(ctx).Error(err)
-		return err
-	}
-	defer doc.Close()
 
 	successFilePaths := []string{}
 	err = datastore.Transaction(ctx, datastore.Get().Db, func(tx *sqlx.Tx) error {
@@ -75,53 +67,51 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 		}
 
 		coverFileGuid := ""
-		for pageNum := 0; pageNum < doc.NumPage(); pageNum++ {
-			img, err := doc.Image(pageNum)
-			if err != nil {
-				logrus.WithContext(ctx).Error(err)
-				return err
-			}
 
-			var extension, httpContentType string
-			if params.ImgFormat == "jpeg" {
-				extension = "jpeg"
-				httpContentType = "image/jpeg"
-			} else {
-				extension = "png"
-				httpContentType = "image/png"
-			}
+		outputDir := fmt.Sprintf("%s/book_contents", config.Get().FileBucketPath)
+		baseName := fmt.Sprintf("%d_%s", time.Now().UnixMilli(), params.Slug)
+		outputPattern := filepath.Join(outputDir, fmt.Sprintf("%s-%%d.jpeg", baseName))
+		gsArgs := []string{
+			"-dNOPAUSE",     //
+			"-dBATCH",       //
+			"-dSAFER",       //
+			"-sDEVICE=jpeg", //
+			"-dJPEGQ=90",    //
+			"-r225",         // Resolution in DPI
+			fmt.Sprintf("-sOutputFile=%s", outputPattern), //
+			tempPDFPath, //
+		}
 
+		cmd := exec.Command("/opt/homebrew/bin/gs", gsArgs...)
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			logrus.WithContext(ctx).WithFields(logrus.Fields{
+				"cmd_output": output,
+			}).Error(err)
+			return err
+		}
+
+		pattern := filepath.Join(outputDir, fmt.Sprintf("%s-*.jpeg", baseName))
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+
+		if len(matches) == 0 {
+			err = fmt.Errorf("empty pages")
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+
+		for idx, filePath := range matches {
 			guid := random.MustGenUUIDTimes(2)
-			if params.CustomImageSlug != "" {
-				guid = fmt.Sprintf("%v-%v", params.CustomImageSlug, pageNum)
-			}
-			filePath := fmt.Sprintf("%s/book_contents/%v_%s.%s", config.Get().FileBucketPath, time.Now().UnixMilli(), guid, extension)
-			file, err := os.Create(filePath)
-			if err != nil {
-				logrus.WithContext(ctx).Error(err)
-				return err
-			}
-			defer file.Close()
-
-			if params.ImgFormat == "jpeg" {
-				err = jpeg.Encode(file, img, &jpeg.Options{
-					Quality: 90,
-				})
-			} else {
-				err = png.Encode(file, img)
-			}
-			if err != nil {
-				logrus.WithContext(ctx).Error(err)
-				return err
-			}
-			successFilePaths = append(successFilePaths, filePath)
-
 			fileBucket := model.FileBucket{
 				Guid:            guid,
-				Name:            fmt.Sprintf("book %v - page %v", book.ID, pageNum+1),
+				Name:            fmt.Sprintf("book %v - page %v", book.ID, idx),
 				BaseType:        "image",
-				Extension:       extension,
-				HttpContentType: httpContentType,
+				Extension:       "jpeg",
+				HttpContentType: "image/jpeg",
 				Metadata:        model.FileBucketMetadata{},
 				Data:            []byte{},
 				ExactPath:       filePath,
@@ -134,7 +124,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 
 			bookContent := model.BookContent{
 				BookID:        book.ID,
-				PageNumber:    int64(pageNum + 1),
+				PageNumber:    int64(idx + 1),
 				ImageFileGuid: fileGuid,
 				Description:   "",
 				Metadata:      model.BookContentMetadata{},
@@ -145,11 +135,12 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 				return err
 			}
 
-			if pageNum == 0 {
+			if idx == 0 {
 				coverFileGuid = fileGuid
 			}
 
-			logrus.WithContext(ctx).Infof("success inserting image %v/%v", pageNum+1, doc.NumPage())
+			successFilePaths = append(successFilePaths, filePath)
+			logrus.WithContext(ctx).Infof("success inserting image %v/%v", idx+1, len(matches))
 		}
 
 		book.CoverFileGuid = coverFileGuid
@@ -163,14 +154,12 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 	})
 	if err != nil {
 		// clean up successfully uploaded file
-		go func() {
-			for _, successFilePath := range successFilePaths {
-				err = os.Remove(successFilePath)
-				if err != nil {
-					logrus.WithContext(ctx).Error(err)
-				}
+		for _, successFilePath := range successFilePaths {
+			err = os.Remove(successFilePath)
+			if err != nil {
+				logrus.WithContext(context.Background()).Error(err)
 			}
-		}()
+		}
 
 		logrus.WithContext(ctx).Error(err)
 		return err
