@@ -40,7 +40,7 @@ func UserAuth(next http.Handler) http.Handler {
 
 		accessToken := splitted[1]
 
-		userAuth, errMsg, err := user_auth.VerifyAccessToken(ctx, accessToken)
+		userAuth, errMsg, err := user_auth.VerifyAccessToken(ctx, accessToken, user_auth.VerifyOpts{})
 		if err != nil {
 			render.RawError(w, r, 401, err, "unauthorized", errMsg)
 			return
@@ -49,8 +49,10 @@ func UserAuth(next http.Handler) http.Handler {
 		commonCtx := common_ctx.Get(r)
 
 		commonCtx.UserAuth = common_ctx.UserAuth{
-			GUID: userAuth.GUID,
-			Name: userAuth.Name,
+			GUID:     userAuth.GUID,
+			Name:     userAuth.Name,
+			Username: userAuth.Username,
+			Email:    userAuth.Email,
 		}
 
 		ctx = context.WithValue(r.Context(), common_ctx.CommonCtxKey, commonCtx)
@@ -86,7 +88,7 @@ func OptionalUserAuth(next http.Handler) http.Handler {
 
 		accessToken := splitted[1]
 
-		userAuth, errMsg, err := user_auth.VerifyAccessToken(ctx, accessToken)
+		userAuth, errMsg, err := user_auth.VerifyAccessToken(ctx, accessToken, user_auth.VerifyOpts{})
 		if err != nil {
 			logrus.WithContext(ctx).WithFields(logrus.Fields{
 				"err_msg": errMsg,
@@ -96,8 +98,10 @@ func OptionalUserAuth(next http.Handler) http.Handler {
 		}
 
 		commonCtx.UserAuth = common_ctx.UserAuth{
-			GUID: userAuth.GUID,
-			Name: userAuth.Name,
+			GUID:     userAuth.GUID,
+			Name:     userAuth.Name,
+			Username: userAuth.Username,
+			Email:    userAuth.Email,
 		}
 
 		ctx = context.WithValue(r.Context(), common_ctx.CommonCtxKey, commonCtx)

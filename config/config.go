@@ -28,9 +28,9 @@ func Initialize() {
 		OllamaHost:        getEnvStringWithDefault("OLLAMA_HOST", "http://localhost:11434"),
 		ComfyUIOutputDir:  getEnvStringWithDefault("COMFY_UI_OUTPUT_DIR", "/Users/umar/umar/personal_project/dev-notes/local_app/ComfyUI/output"),
 
-		JxAuthJwtPrivateKey: os.Getenv("JX_AUTH_JWT_PRIVATE_KEY"),
-		JxAuthJwtPublicKey:  os.Getenv("JX_AUTH_JWT_PUBLIC_KEY"),
-		JxAuthJweSecretKey:  os.Getenv("JX_AUTH_JWE_SECRET_KEY"),
+		CkAuthJwtPrivateKey: os.Getenv("CK_AUTH_JWT_PRIVATE_KEY"),
+		CkAuthJwtPublicKey:  os.Getenv("CK_AUTH_JWT_PUBLIC_KEY"),
+		CkAuthJweSecretKey:  os.Getenv("CK_AUTH_JWE_SECRET_KEY"),
 
 		ChatTokenJwtPrivateKey: os.Getenv("CHAT_TOKEN_JWT_PRIVATE_KEY"),
 		ChatTokenJwtPublicKey:  os.Getenv("CHAT_TOKEN_JWT_PUBLIC_KEY"),

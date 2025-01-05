@@ -15,9 +15,9 @@ type (
 		OllamaHost        string //
 		ComfyUIOutputDir  string
 
-		JxAuthJwtPrivateKey string // jx auth - used for generating auth
-		JxAuthJwtPublicKey  string // it will be jwt + jwe encryption
-		JxAuthJweSecretKey  string //
+		CkAuthJwtPrivateKey string // jx auth - used for generating auth
+		CkAuthJwtPublicKey  string // it will be jwt + jwe encryption
+		CkAuthJweSecretKey  string //
 
 		ChatTokenJwtPrivateKey string
 		ChatTokenJwtPublicKey  string

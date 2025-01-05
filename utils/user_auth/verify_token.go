@@ -10,7 +10,7 @@ import (
 	jose "gopkg.in/square/go-jose.v2"
 )
 
-func VerifyAccessToken(ctx context.Context, accessToken string) (Payload, string, error) {
+func VerifyAccessToken(ctx context.Context, accessToken string, opts VerifyOpts) (Payload, string, error) {
 	encryptedObject, err := jose.ParseEncrypted(accessToken)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
@@ -45,6 +45,8 @@ func VerifyAccessToken(ctx context.Context, accessToken string) (Payload, string
 		logrus.WithContext(ctx).Error(err)
 		return Payload{}, "Claim Failed", err
 	}
+
+	// TODO: session validation to redis
 
 	return payload, "", nil
 }

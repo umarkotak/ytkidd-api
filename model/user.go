@@ -1,5 +1,10 @@
 package model
 
+import (
+	"database/sql"
+	"time"
+)
+
 const (
 	USER_STATUS_UNVERIFIED = "unverified"
 	USER_STATUS_ACTIVE     = "active"
@@ -14,17 +19,15 @@ var (
 
 type (
 	User struct {
-		ID          string `db:"id"`
-		CreatedAt   string `db:"created_at"`
-		UpdatedAt   string `db:"updated_at"`
-		DeletedAt   string `db:"deleted_at"`
-		Guid        string `db:"guid"`
-		Phone       string `db:"phone"`
-		Email       string `db:"email"`
-		About       string `db:"about"`
-		Password    string `db:"password"`
-		Name        string `db:"name"`
-		Gender      string `db:"gender"`
-		DateOfBirth string `db:"date_of_birth"`
+		ID        int64        `db:"id"`
+		CreatedAt time.Time    `db:"created_at"`
+		UpdatedAt time.Time    `db:"updated_at"`
+		DeletedAt sql.NullTime `db:"deleted_at"`
+		Guid      string       `db:"guid"`
+		Email     string       `db:"email"`
+		About     string       `db:"about"`
+		Password  string       `db:"password"`
+		Name      string       `db:"name"`
+		Username  string       `db:"username"`
 	}
 )

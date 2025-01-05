@@ -9,8 +9,10 @@ type (
 	CommonCtxKeyType string
 
 	UserAuth struct {
-		GUID string `json:"guid"`
-		Name string `json:"name"`
+		GUID     string `json:"guid"`
+		Name     string `json:"name"`
+		Username string `json:"username"`
+		Email    string `json:"email"`
 	}
 
 	CommonCtx struct {
@@ -18,7 +20,6 @@ type (
 		DeviceOs        string // X-Device-Os. device os, Eg: android/ios/windows/ubuntu/other
 		AppVersion      string // X-App-Version. Eg: 1.20.30
 		ActivitySession string // X-Activity-Session. generated every opening app
-		GuestGender     string // X-Guest-Gender. Enum: male, female
 
 		UserAuth UserAuth
 	}
@@ -79,6 +80,5 @@ func FromRequestHeader(r *http.Request) CommonCtx {
 		DeviceOs:        deviceOs,
 		ActivitySession: r.Header.Get("X-Activity-Session"),
 		AppVersion:      r.Header.Get("X-App-Version"),
-		GuestGender:     r.Header.Get("X-Guest-Gender"),
 	}
 }

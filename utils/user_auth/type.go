@@ -9,5 +9,10 @@ type (
 		ExpirationTime int64  `json:"exp"`
 		GUID           string `json:"guid"`
 		Name           string `json:"name"`
+		Username       string `json:"username"`
+		Email          string `json:"email"`
+	}
+
+	VerifyOpts struct {
 	}
 )

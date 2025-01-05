@@ -19,6 +19,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/handlers/comfy_ui_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/file_bucket_handler.go"
 	"github.com/umarkotak/ytkidd-api/handlers/ping_handler"
+	"github.com/umarkotak/ytkidd-api/handlers/user_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_channel_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_video_handler"
@@ -26,6 +27,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/repos/book_content_repo"
 	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/repos/file_bucket_repo"
+	"github.com/umarkotak/ytkidd-api/repos/user_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_channel_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
 	"github.com/umarkotak/ytkidd-api/utils/log_formatter"
@@ -100,9 +102,9 @@ func initializeDependencies() {
 	var err error
 
 	user_auth.Initialize(user_auth.UserAuth{
-		JwtPrivateKey: config.Get().JxAuthJwtPrivateKey,
-		JwtPublicKey:  config.Get().JxAuthJwtPublicKey,
-		JweSecretKey:  config.Get().JxAuthJweSecretKey,
+		JwtPrivateKey: config.Get().CkAuthJwtPrivateKey,
+		JwtPublicKey:  config.Get().CkAuthJwtPublicKey,
+		JweSecretKey:  config.Get().CkAuthJweSecretKey,
 	})
 
 	err = ratelimit_lib.Initialize(ratelimit_lib.RateLimiter{
@@ -139,6 +141,7 @@ func initializeDependencies() {
 	book_repo.Initialize()
 	book_content_repo.Initialize()
 	file_bucket_repo.Initialize()
+	user_repo.Initialize()
 
 	word_censor_lib.Initialize(word_censor_lib.WordCensorLib{
 		Words: []string{"kucing", "anjing", "gajah"},
@@ -160,7 +163,7 @@ func initializeHttpServer() {
 
 	r.Route("/ytkidd/api", func(ri chi.Router) {
 		// rDevInternal := ri.With(middlewares.InternalDevAuth)
-		// rUserAuth := ri.With(middlewares.UserAuth)
+		rUserAuth := ri.With(middlewares.UserAuth)
 		// rOptionalUserAuth := ri.With(middlewares.OptionalUserAuth)
 
 		ri.Get("/ping", ping_handler.Ping)
@@ -180,6 +183,15 @@ func initializeHttpServer() {
 
 		ri.Get("/comfy_ui/output", comfy_ui_handler.Gallery)
 		ri.Post("/ai/chat", ai_handler.Chat)
+
+		ri.Post("/user/sign_up", user_handler.SignUp)
+		ri.Post("/user/sign_in", user_handler.SignIn)
+		rUserAuth.Get("/user/check_auth", user_handler.CheckAuth)
+		rUserAuth.Get("/user/profile", user_handler.MyProfile)
+		rUserAuth.Get("/user/subscription", ping_handler.ToDo)
+
+		rUserAuth.Post("/order/new", ping_handler.ToDo)
+		rUserAuth.Post("/order/pay", ping_handler.ToDo)
 
 		ri.Get("/file_bucket/{guid}", file_bucket_handler.GetByGuid)
 	})
