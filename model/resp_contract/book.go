@@ -22,6 +22,7 @@ type (
 		Tags         []string      `json:"tags"`
 		Type         string        `json:"type"`
 		Contents     []BookContent `json:"contents"`
+		PdfUrl       string        `json:"pdf_url"`
 	}
 
 	BookContent struct {

@@ -2,9 +2,11 @@ package book_service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/config"
 	"github.com/umarkotak/ytkidd-api/datastore"
 	"github.com/umarkotak/ytkidd-api/model/contract"
 	"github.com/umarkotak/ytkidd-api/model/resp_contract"
@@ -65,6 +67,11 @@ func GetBookDetail(ctx context.Context, params contract.GetBooks) (resp_contract
 		bookContentDatas = append(bookContentDatas, bookContentData)
 	}
 
+	pdfUrl := ""
+	if book.PdfFileGuid != "" {
+		pdfUrl = fmt.Sprintf("%s/%s", config.Get().AppHost, book.PdfFileGuid)
+	}
+
 	bookDetail := resp_contract.BookDetail{
 		ID:           book.ID,
 		Title:        book.Title,
@@ -73,6 +80,7 @@ func GetBookDetail(ctx context.Context, params contract.GetBooks) (resp_contract
 		Tags:         book.Tags,
 		Type:         book.Type,
 		Contents:     bookContentDatas,
+		PdfUrl:       pdfUrl,
 	}
 
 	return bookDetail, nil

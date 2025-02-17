@@ -23,15 +23,16 @@ import (
 )
 
 func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
-	tempDir, err := os.MkdirTemp("", "pdf-images")
+	err := utils.CreateFolderIfNotExists(fmt.Sprintf("%s/book_pdfs", config.Get().FileBucketPath))
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return err
 	}
-	defer os.RemoveAll(tempDir)
 
-	tempPDFPath := fmt.Sprintf("%s/uploaded-%v.pdf", tempDir, params.Slug)
-	err = os.WriteFile(tempPDFPath, params.PdfBytes, 0644)
+	pdfDir := fmt.Sprintf("%s/book_pdfs", config.Get().FileBucketPath)
+
+	pdfFilePath := fmt.Sprintf("%s/uploaded-%v.pdf", pdfDir, params.Slug)
+	err = os.WriteFile(pdfFilePath, params.PdfBytes, 0644)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return err
@@ -50,7 +51,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			CoverFileGuid:  "",
 			Tags:           pq.StringArray{},
 			Type:           bookType,
-			PdfFileGuid:    "",
+			PdfFileGuid:    pdfFilePath,
 			Active:         true,
 			OriginalPdfUrl: params.OriginalPdfUrl,
 		}
@@ -79,7 +80,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			"-dJPEGQ=90",    //
 			"-r225",         // Resolution in DPI
 			fmt.Sprintf("-sOutputFile=%s", outputPattern), //
-			tempPDFPath, //
+			pdfFilePath, //
 		}
 
 		cmd := exec.Command("/opt/homebrew/bin/gs", gsArgs...)
