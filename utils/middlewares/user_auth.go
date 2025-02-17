@@ -53,6 +53,7 @@ func UserAuth(next http.Handler) http.Handler {
 			Name:     userAuth.Name,
 			Username: userAuth.Username,
 			Email:    userAuth.Email,
+			PhotoUrl: userAuth.PhotoUrl,
 		}
 
 		ctx = context.WithValue(r.Context(), common_ctx.CommonCtxKey, commonCtx)

@@ -9,9 +9,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/model"
 )
 
-func Insert(ctx context.Context, tx *sqlx.Tx, user model.User) (int64, error) {
-	newID := int64(0)
-
+func Insert(ctx context.Context, tx *sqlx.Tx, user model.User) (int64, string, error) {
 	randomUUID, _ := uuid.NewRandom()
 	user.Guid = randomUUID.String()
 
@@ -23,19 +21,19 @@ func Insert(ctx context.Context, tx *sqlx.Tx, user model.User) (int64, error) {
 		namedStmt, err := tx.PrepareNamedContext(ctx, queryInsert)
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
-			return newID, err
+			return 0, "", err
 		}
 
 		row = namedStmt.QueryRowContext(ctx, user)
 	}
 
-	err := row.Scan(&newID)
+	err := row.Scan(&user.ID)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return newID, err
+		return 0, "", err
 	}
 
-	return newID, nil
+	return user.ID, user.Guid, nil
 }
 
 func Update(ctx context.Context, tx *sqlx.Tx, user model.User) error {

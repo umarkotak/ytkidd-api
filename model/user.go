@@ -29,5 +29,6 @@ type (
 		Password  string       `db:"password"`
 		Name      string       `db:"name"`
 		Username  string       `db:"username"`
+		PhotoUrl  string       `db:"photo_url"`
 	}
 )

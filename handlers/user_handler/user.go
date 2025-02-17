@@ -11,32 +11,6 @@ import (
 	"github.com/umarkotak/ytkidd-api/utils/render"
 )
 
-func SignUp(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	params := contract.UserSignUp{}
-
-	err := utils.BindJson(r, &params)
-	if err != nil {
-		logrus.WithContext(ctx).Error(err)
-		render.Error(w, r, err, "")
-		return
-	}
-
-	params.Name = params.Email
-	params.Username = params.Email
-	params.About = ""
-
-	_, err = user_service.SignUp(ctx, params)
-	if err != nil {
-		logrus.WithContext(ctx).Error(err)
-		render.Error(w, r, err, "")
-		return
-	}
-
-	render.Response(w, r, 200, nil)
-}
-
 func SignIn(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -64,7 +38,7 @@ func CheckAuth(w http.ResponseWriter, r *http.Request) {
 
 	commonCtx := common_ctx.GetFromCtx(ctx)
 
-	render.Response(w, r, 200, commonCtx)
+	render.Response(w, r, 200, commonCtx.UserAuth)
 }
 
 func MyProfile(w http.ResponseWriter, r *http.Request) {

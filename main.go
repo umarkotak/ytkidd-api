@@ -27,6 +27,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/repos/book_content_repo"
 	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/repos/file_bucket_repo"
+	"github.com/umarkotak/ytkidd-api/repos/google_repo"
 	"github.com/umarkotak/ytkidd-api/repos/user_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_channel_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
@@ -142,6 +143,7 @@ func initializeDependencies() {
 	book_content_repo.Initialize()
 	file_bucket_repo.Initialize()
 	user_repo.Initialize()
+	google_repo.Initialize()
 
 	word_censor_lib.Initialize(word_censor_lib.WordCensorLib{
 		Words: []string{"kucing", "anjing", "gajah"},
@@ -184,7 +186,6 @@ func initializeHttpServer() {
 		ri.Get("/comfy_ui/output", comfy_ui_handler.Gallery)
 		ri.Post("/ai/chat", ai_handler.Chat)
 
-		ri.Post("/user/sign_up", user_handler.SignUp)
 		ri.Post("/user/sign_in", user_handler.SignIn)
 		rUserAuth.Get("/user/check_auth", user_handler.CheckAuth)
 		rUserAuth.Get("/user/profile", user_handler.MyProfile)

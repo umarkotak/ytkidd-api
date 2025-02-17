@@ -21,6 +21,7 @@ var (
 		"u.password",
 		"u.name",
 		"u.username",
+		"u.photo_url",
 	}, ", ")
 
 	queryGetByEmail = fmt.Sprintf(`
@@ -57,6 +58,7 @@ var (
 			about,
 			password,
 			name,
+			photo_url,
 			username
 		) VALUES (
 			:guid,
@@ -64,6 +66,7 @@ var (
 			:about,
 			:password,
 			:name,
+			:photo_url,
 			:username
 		) RETURNING id
 	`
@@ -77,6 +80,7 @@ var (
 			password = :password,
 			name = :name,
 			username = :username,
+			photo_url = :photo_url,
 			updated_at = NOW()
 		WHERE
 			id = :id
@@ -88,6 +92,7 @@ var (
 			email = guid,
 			name = guid,
 			username = guid,
+			photo_url = guid,
 			deleted_at = NOW()
 		WHERE
 			id = :id

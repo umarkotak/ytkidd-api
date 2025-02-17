@@ -13,15 +13,16 @@ type (
 		Name     string `json:"name"`
 		Username string `json:"username"`
 		Email    string `json:"email"`
+		PhotoUrl string `json:"photo_url"`
 	}
 
 	CommonCtx struct {
-		DeviceID        string // X-Device-Id. device fingerprint must unique as possible per device
-		DeviceOs        string // X-Device-Os. device os, Eg: android/ios/windows/ubuntu/other
-		AppVersion      string // X-App-Version. Eg: 1.20.30
-		ActivitySession string // X-Activity-Session. generated every opening app
+		DeviceID        string `json:"device_id"`        // X-Device-Id. device fingerprint must unique as possible per device
+		DeviceOs        string `json:"device_os"`        // X-Device-Os. device os, Eg: android/ios/windows/ubuntu/other
+		AppVersion      string `json:"app_version"`      // X-App-Version. Eg: 1.20.30
+		ActivitySession string `json:"activity_session"` // X-Activity-Session. generated every opening app
 
-		UserAuth UserAuth
+		UserAuth UserAuth `json:"user_auth"`
 	}
 )
 

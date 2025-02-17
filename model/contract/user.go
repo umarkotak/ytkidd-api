@@ -10,7 +10,6 @@ type (
 	}
 
 	UserSignIn struct {
-		Email    string `json:"email" validate:"required"`
-		Password string `json:"password" validate:"required"`
+		GoogleCredential string `json:"google_credential"`
 	}
 )
