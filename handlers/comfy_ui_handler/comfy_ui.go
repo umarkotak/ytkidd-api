@@ -2,24 +2,30 @@ package comfy_ui_handler
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/config"
 	"github.com/umarkotak/ytkidd-api/utils/render"
+)
+
+const (
+	ImgBasePath = "ytkidd-api-m4.cloudflare-avatar-id-1.site/comfy_ui_gallery"
 )
 
 func Gallery(w http.ResponseWriter, r *http.Request) {
 	files, err := os.ReadDir(config.Get().ComfyUIOutputDir)
 	if err != nil {
-		log.Fatal(err)
+		logrus.WithContext(r.Context()).Error(err)
+		render.Error(w, r, err, "")
+		return
 	}
 
 	imageUrls := []string{}
 	for _, file := range files {
 		if !file.IsDir() {
-			imageUrls = append(imageUrls, fmt.Sprintf("%s/%s", "ytkidd-api-m4.cloudflare-avatar-id-1.site/comfy_ui_gallery", file.Name()))
+			imageUrls = append(imageUrls, fmt.Sprintf("%s/%s", ImgBasePath, file.Name()))
 		}
 	}
 

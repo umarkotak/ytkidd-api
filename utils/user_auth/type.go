@@ -12,6 +12,7 @@ type (
 		Username       string `json:"username"`
 		Email          string `json:"email"`
 		PhotoUrl       string `json:"photo_url"`
+		UserRole       string `json:"user_role"`
 	}
 
 	VerifyOpts struct {

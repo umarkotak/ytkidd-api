@@ -59,6 +59,7 @@ func SignIn(ctx context.Context, params contract.UserSignIn) (resp_contract.User
 		Username:       user.Username,
 		Email:          user.Email,
 		PhotoUrl:       user.PhotoUrl,
+		UserRole:       user.UserRole,
 	}
 	accessToken, err := user_auth.GenToken(ctx, authPayload)
 	if err != nil {

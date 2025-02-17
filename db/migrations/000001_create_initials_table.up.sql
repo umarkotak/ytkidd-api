@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
   password TEXT NOT NULL DEFAULT '',
   name TEXT NOT NULL DEFAULT '',
   photo_url TEXT NOT NULL DEFAULT '',
+  user_role TEXT NOT NULL DEFAULT 'basic',
   username CITEXT NOT NULL UNIQUE
 );
 ALTER SEQUENCE users_id_seq RESTART WITH 1;

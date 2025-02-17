@@ -22,6 +22,7 @@ var (
 		"u.name",
 		"u.username",
 		"u.photo_url",
+		"u.user_role",
 	}, ", ")
 
 	queryGetByEmail = fmt.Sprintf(`
