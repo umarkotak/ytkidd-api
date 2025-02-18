@@ -29,3 +29,26 @@ func GetChannels(ctx context.Context, params contract.GetYoutubeChannels) ([]res
 
 	return respYoutubeChannels, nil
 }
+
+func UpdateChannel(ctx context.Context, params contract.UpdateYoutubeChannel) error {
+	youtubeChannel, err := youtube_channel_repo.GetByID(ctx, params.ID)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	youtubeChannel.ExternalID = params.ExternalID
+	youtubeChannel.Name = params.Name
+	youtubeChannel.Username = params.Username
+	youtubeChannel.ImageUrl = params.ImageUrl
+	youtubeChannel.Active = params.Active
+	youtubeChannel.ChannelLink = params.ChannelLink
+
+	err = youtube_channel_repo.Update(ctx, nil, youtubeChannel)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	return nil
+}

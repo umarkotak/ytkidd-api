@@ -65,3 +65,26 @@ func GetYoutubeChannelDetail(w http.ResponseWriter, r *http.Request) {
 		"videos": youtubeVideos.Videos,
 	})
 }
+
+func UpdateYoutubeChannel(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	params := contract.UpdateYoutubeChannel{
+		ID: utils.StringMustInt64(chi.URLParam(r, "id")),
+	}
+	err := utils.BindJson(r, &params)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	err = youtube_channel_service.UpdateChannel(ctx, params)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	render.Response(w, r, 200, map[string]any{})
+}

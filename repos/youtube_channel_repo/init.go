@@ -21,6 +21,7 @@ var (
 		"ytch.image_url",
 		"ytch.tags",
 		"ytch.active",
+		"ytch.channel_link",
 	}, ", ")
 
 	queryGetByID = fmt.Sprintf(`
@@ -60,13 +61,15 @@ var (
 			name,
 			username,
 			image_url,
-			tags
+			tags,
+			channel_link
 		) VALUES (
 			:external_id,
 			:name,
 			:username,
 			:image_url,
-			:tags
+			:tags,
+			:channel_link
 		) RETURNING id
 	`
 
@@ -77,7 +80,8 @@ var (
 			username = :username,
 			image_url = :image_url,
 			tags = :tags,
-			active = :active
+			active = :active,
+			channel_link = :channel_link
 		WHERE
 			id = :id
 	`
