@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS youtube_channels (
   username TEXT NOT NULL UNIQUE,
   image_url TEXT NOT NULL,
   tags TEXT [] NOT NULL DEFAULT '{}',
-  channel_link TEXT NOT NULL DEFAULT '',
+  channel_link TEXT NOT NULL DEFAULT '#',
   active BOOLEAN NOT NULL DEFAULT TRUE
 );
 ALTER SEQUENCE users_id_seq RESTART WITH 1;
