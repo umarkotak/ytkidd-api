@@ -52,11 +52,12 @@ func ScrapVideos(ctx context.Context, params contract.ScrapVideos) (string, bool
 
 		if youtubeChannel.ID == 0 {
 			youtubeChannel = model.YoutubeChannel{
-				ExternalID: params.ChannelID,
-				Name:       html.UnescapeString(item.Snippet.ChannelTitle),
-				Username:   html.UnescapeString(item.Snippet.ChannelTitle),
-				ImageUrl:   "",
-				Tags:       []string{},
+				ExternalID:  params.ChannelID,
+				Name:        html.UnescapeString(item.Snippet.ChannelTitle),
+				Username:    html.UnescapeString(item.Snippet.ChannelTitle),
+				ImageUrl:    "",
+				Tags:        []string{},
+				ChannelLink: "#",
 			}
 			youtubeChannel.ID, err = youtube_channel_repo.Insert(ctx, nil, youtubeChannel)
 			if err != nil {
