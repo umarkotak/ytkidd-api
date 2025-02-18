@@ -48,6 +48,7 @@ func GetYoutubeChannelDetail(w http.ResponseWriter, r *http.Request) {
 	youtubeVideos, err := youtube_video_service.GetVideos(ctx, contract.GetYoutubeVideos{
 		ChannelIDs: []int64{youtubeChannelID},
 		Pagination: model.Pagination{Limit: 50},
+		Sort:       r.URL.Query().Get("sort"),
 	})
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
@@ -64,6 +65,34 @@ func GetYoutubeChannelDetail(w http.ResponseWriter, r *http.Request) {
 		},
 		"videos": youtubeVideos.Videos,
 	})
+}
+
+func GetYoutubeChannelDetailed(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	youtubeChannelID := utils.StringMustInt64(chi.URLParam(r, "id"))
+
+	youtubeChannel, err := youtube_channel_repo.GetByID(ctx, youtubeChannelID)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	render.Response(w, r, 200,
+		resp_contract.YoutubeChannelDetailed{
+			ID:          youtubeChannel.ID,
+			CreatedAt:   youtubeChannel.CreatedAt,
+			UpdatedAt:   youtubeChannel.UpdatedAt,
+			ExternalID:  youtubeChannel.ExternalID,
+			Name:        youtubeChannel.Name,
+			Username:    youtubeChannel.Username,
+			ImageUrl:    youtubeChannel.ImageUrl,
+			Tags:        youtubeChannel.Tags,
+			Active:      youtubeChannel.Active,
+			ChannelLink: youtubeChannel.ChannelLink,
+		},
+	)
 }
 
 func UpdateYoutubeChannel(w http.ResponseWriter, r *http.Request) {

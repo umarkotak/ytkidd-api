@@ -2,8 +2,10 @@ package youtube_video_repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/datastore"
 	"github.com/umarkotak/ytkidd-api/model"
 	"github.com/umarkotak/ytkidd-api/model/contract"
 )
@@ -43,6 +45,8 @@ func GetForSearch(ctx context.Context, params contract.YoutubeVideoSearch) ([]mo
 }
 
 func GetByParams(ctx context.Context, params contract.GetYoutubeVideos) ([]model.YoutubeVideoDetailed, error) {
+	objs := []model.YoutubeVideoDetailed{}
+
 	params.SetDefault()
 	if params.Tags == nil {
 		params.Tags = []string{}
@@ -57,8 +61,22 @@ func GetByParams(ctx context.Context, params contract.GetYoutubeVideos) ([]model
 		params.ExcludeChannelIDs = []int64{}
 	}
 
-	objs := []model.YoutubeVideoDetailed{}
-	err := stmtGetByParams.SelectContext(ctx, &objs, params)
+	if params.Sort == "" {
+		params.Sort = "RANDOM()"
+	} else if params.Sort == "id_desc" {
+		params.Sort = "ytvid.id DESC"
+	} else {
+		params.Sort = "RANDOM()"
+	}
+
+	query := fmt.Sprintf(queryGetByParams, params.Sort)
+	stmtGetByParams, err := datastore.Get().Db.PrepareNamed(query)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return objs, err
+	}
+
+	err = stmtGetByParams.SelectContext(ctx, &objs, params)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return objs, err

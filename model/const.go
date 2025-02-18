@@ -19,7 +19,7 @@ const (
 )
 
 const (
-	YOUTUBE_MAX_PAGE = 20
+	YOUTUBE_MAX_PAGE = int64(1)
 
 	SCOPE_ALL        = "all"
 	SCOPE_GIFTS      = "gifts"

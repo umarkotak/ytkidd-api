@@ -80,7 +80,7 @@ var (
 			AND (:exclude_ids = '{}' OR ytvid.id != ANY(:exclude_ids))
 			AND (:exclude_channel_ids = '{}' OR NOT(ytch.id = ANY(:exclude_channel_ids)))
 			AND (:channel_ids = '{}' OR ytch.id = ANY(:channel_ids))
-		ORDER BY RANDOM()
+		ORDER BY %s
 		LIMIT :limit OFFSET :offset
 	`
 
@@ -126,7 +126,6 @@ var (
 	stmtGetByID         *sqlx.NamedStmt
 	stmtGetByExternalID *sqlx.NamedStmt
 	stmtGetForSearch    *sqlx.NamedStmt
-	stmtGetByParams     *sqlx.NamedStmt
 	stmtInsert          *sqlx.NamedStmt
 	stmtUpdate          *sqlx.NamedStmt
 	stmtSoftDelete      *sqlx.NamedStmt
@@ -144,10 +143,6 @@ func Initialize() {
 		logrus.Fatal(err)
 	}
 	stmtGetForSearch, err = datastore.Get().Db.PrepareNamed(queryGetForSearch)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	stmtGetByParams, err = datastore.Get().Db.PrepareNamed(queryGetByParams)
 	if err != nil {
 		logrus.Fatal(err)
 	}

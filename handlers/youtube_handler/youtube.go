@@ -22,15 +22,21 @@ func ScrapVideos(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for i := 1; i <= model.YOUTUBE_MAX_PAGE; i++ {
-		nextPageToken, err := youtube_service.ScrapVideos(ctx, params)
+	maxPage := params.MaxPage
+	if maxPage <= 0 {
+		maxPage = model.YOUTUBE_MAX_PAGE
+	}
+
+	for i := 1; i <= int(maxPage); i++ {
+		nextPageToken, someVideoExist, err := youtube_service.ScrapVideos(ctx, params)
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
 			render.Error(w, r, err, "")
 			return
 		}
 
-		if !params.All {
+		if params.BreakOnExists && someVideoExist {
+			logrus.WithContext(ctx).Infof("iter: %v", i)
 			break
 		}
 

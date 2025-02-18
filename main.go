@@ -174,6 +174,7 @@ func initializeHttpServer() {
 		ri.Get("/youtube_video/{id}", youtube_video_handler.GetYoutubeVideoDetail)
 		ri.Get("/youtube_channels", youtube_channel_handler.GetYoutubeChannels)
 		ri.Get("/youtube_channel/{id}", youtube_channel_handler.GetYoutubeChannelDetail)
+		rUserAuth.Get("/youtube_channel/{id}/detailed", youtube_channel_handler.GetYoutubeChannelDetailed)
 		rUserAuth.Patch("/youtube_channel/{id}", youtube_channel_handler.UpdateYoutubeChannel)
 
 		ri.Post("/youtube/scrap_videos", youtube_handler.ScrapVideos)

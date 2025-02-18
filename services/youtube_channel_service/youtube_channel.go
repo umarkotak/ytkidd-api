@@ -20,10 +20,11 @@ func GetChannels(ctx context.Context, params contract.GetYoutubeChannels) ([]res
 
 	for _, youtubeChannel := range youtubeChannels {
 		respYoutubeChannels = append(respYoutubeChannels, resp_contract.YoutubeChannel{
-			ID:       youtubeChannel.ID,
-			ImageUrl: youtubeChannel.ImageUrl,
-			Name:     youtubeChannel.Name,
-			Tags:     youtubeChannel.Tags,
+			ID:         youtubeChannel.ID,
+			ImageUrl:   youtubeChannel.ImageUrl,
+			Name:       youtubeChannel.Name,
+			Tags:       youtubeChannel.Tags,
+			ExternalID: youtubeChannel.ExternalID,
 		})
 	}
 

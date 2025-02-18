@@ -15,26 +15,28 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
-func ScrapVideos(ctx context.Context, params contract.ScrapVideos) (string, error) {
+func ScrapVideos(ctx context.Context, params contract.ScrapVideos) (string, bool, error) {
 	nextPageToken := ""
+	someVideoExist := false
 
 	youtubeService, err := youtube.NewService(ctx, option.WithAPIKey(config.Get().YoutubeApiKey))
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return nextPageToken, err
+		return nextPageToken, someVideoExist, err
 	}
 
 	call := youtubeService.Search.List([]string{"id", "snippet"})
-	call = call.ChannelId(params.ChannelID)
-	call = call.Q(params.Query)
-	call = call.Type("video")
-	call = call.PageToken(params.PageToken)
-	call = call.MaxResults(50) // Get up to 50 results
+	call = call.ChannelId(params.ChannelID). //
+							Q(params.Query).             //
+							Type("video").               //
+							PageToken(params.PageToken). //
+							MaxResults(50).              // Get up to 50 results.
+							Order("date")                //
 
 	response, err := call.Do()
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return nextPageToken, err
+		return nextPageToken, someVideoExist, err
 	}
 
 	for _, item := range response.Items {
@@ -45,7 +47,7 @@ func ScrapVideos(ctx context.Context, params contract.ScrapVideos) (string, erro
 		youtubeChannel, err := youtube_channel_repo.GetByExternalID(ctx, params.ChannelID)
 		if err != nil && err != sql.ErrNoRows {
 			logrus.WithContext(ctx).Error(err)
-			return nextPageToken, err
+			return nextPageToken, someVideoExist, err
 		}
 
 		if youtubeChannel.ID == 0 {
@@ -59,17 +61,21 @@ func ScrapVideos(ctx context.Context, params contract.ScrapVideos) (string, erro
 			youtubeChannel.ID, err = youtube_channel_repo.Insert(ctx, nil, youtubeChannel)
 			if err != nil {
 				logrus.WithContext(ctx).Error(err)
-				return nextPageToken, err
+				return nextPageToken, someVideoExist, err
 			}
 		}
+
+		// js, _ := item.MarshalJSON()
+		// logrus.Infof("VIDEO: %+v", string(js))
 
 		youtubeVideo, err := youtube_video_repo.GetByExternalID(ctx, item.Id.VideoId)
 		if err != nil && err != sql.ErrNoRows {
 			logrus.WithContext(ctx).Error(err)
-			return nextPageToken, err
+			return nextPageToken, someVideoExist, err
 		}
 
 		if youtubeVideo.ID != 0 {
+			someVideoExist = true
 			continue
 		}
 
@@ -84,11 +90,11 @@ func ScrapVideos(ctx context.Context, params contract.ScrapVideos) (string, erro
 		youtubeVideo.ID, err = youtube_video_repo.Insert(ctx, nil, youtubeVideo)
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
-			return nextPageToken, err
+			return nextPageToken, someVideoExist, err
 		}
 	}
 
 	nextPageToken = response.NextPageToken
 
-	return nextPageToken, nil
+	return nextPageToken, someVideoExist, nil
 }
