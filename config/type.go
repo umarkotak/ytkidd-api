@@ -27,5 +27,9 @@ type (
 
 		DevInternalClientID  string // used manually for dev for internal dev related API
 		DevInternalSecretKey string //
+
+		MidtransMerchantID string
+		MidtransClientKey  string
+		MidtransServerKey  string
 	}
 )

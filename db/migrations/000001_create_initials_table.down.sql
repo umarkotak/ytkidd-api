@@ -1,3 +1,7 @@
+DROP TABLE IF EXISTS user_subscriptions;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS payments;
+DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS file_bucket;
 DROP TABLE IF EXISTS book_contents;
 DROP TABLE IF EXISTS books;

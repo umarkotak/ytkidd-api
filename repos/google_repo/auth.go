@@ -108,7 +108,7 @@ func ValidateGoogleJWT(tokenString string) (*GoogleClaims, error) {
 	}
 
 	// Parse and validate the JWT.
-	parsedToken, err := jwt.ParseWithClaims(tokenString, &GoogleClaims{}, func(token *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.ParseWithClaims(tokenString, &GoogleClaims{}, func(token *jwt.Token) (any, error) {
 		// Ensure the signing method is RSA.
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

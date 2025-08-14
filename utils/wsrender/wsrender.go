@@ -52,7 +52,7 @@ func Error(ctx context.Context, wsConnWrapper *WsConnWrapper, err error, customE
 		errMsg = customErrMsg
 	}
 
-	dataJson, err := json.Marshal(map[string]interface{}{
+	dataJson, err := json.Marshal(map[string]any{
 		"message_type":   "websocket_error",
 		"error_code":     jxErr.ErrorCode,
 		"error_message":  errMsg,

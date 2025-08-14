@@ -18,6 +18,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/handlers/book_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/comfy_ui_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/file_bucket_handler.go"
+	"github.com/umarkotak/ytkidd-api/handlers/order_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/ping_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/user_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_channel_handler"
@@ -28,12 +29,15 @@ import (
 	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/repos/file_bucket_repo"
 	"github.com/umarkotak/ytkidd-api/repos/google_repo"
+	"github.com/umarkotak/ytkidd-api/repos/order_repo"
+	"github.com/umarkotak/ytkidd-api/repos/product_repo"
 	"github.com/umarkotak/ytkidd-api/repos/user_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_channel_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
 	"github.com/umarkotak/ytkidd-api/utils/log_formatter"
 	"github.com/umarkotak/ytkidd-api/utils/log_hook"
 	"github.com/umarkotak/ytkidd-api/utils/middlewares"
+	"github.com/umarkotak/ytkidd-api/utils/payment_lib"
 	"github.com/umarkotak/ytkidd-api/utils/ratelimit_lib"
 	"github.com/umarkotak/ytkidd-api/utils/redis_lock"
 	"github.com/umarkotak/ytkidd-api/utils/user_auth"
@@ -136,6 +140,13 @@ func initializeDependencies() {
 		logrus.WithContext(context.TODO()).Error(err)
 	}
 
+	payment_lib.Initialize(datastore.Get().Db, payment_lib.PaymentConf{
+		IsLive:             false,
+		MidtransMerchantID: config.Get().MidtransMerchantID,
+		MidtransClientKey:  config.Get().MidtransClientKey,
+		MidtransServerKey:  config.Get().MidtransServerKey,
+	})
+
 	// Repositories
 	youtube_channel_repo.Initialize()
 	youtube_video_repo.Initialize()
@@ -144,6 +155,8 @@ func initializeDependencies() {
 	file_bucket_repo.Initialize()
 	user_repo.Initialize()
 	google_repo.Initialize()
+	product_repo.Initialize()
+	order_repo.Initialize()
 
 	word_censor_lib.Initialize(word_censor_lib.WordCensorLib{
 		Words: []string{"kucing", "anjing", "gajah"},
@@ -193,8 +206,10 @@ func initializeHttpServer() {
 		rUserAuth.Get("/user/profile", user_handler.MyProfile)
 		rUserAuth.Get("/user/subscription", ping_handler.ToDo)
 
-		rUserAuth.Post("/order/new", ping_handler.ToDo)
+		rUserAuth.Post("/order/create", order_handler.PostCreateOrder)
 		rUserAuth.Post("/order/pay", ping_handler.ToDo)
+
+		ri.Post("/midtrans/callback", payment_lib.MidtransCallbackHandler)
 
 		ri.Get("/file_bucket/{guid}", file_bucket_handler.GetByGuid)
 	})

@@ -31,7 +31,7 @@ func (m BookContentMetadata) Value() (driver.Value, error) {
 	return json.Marshal(m)
 }
 
-func (m *BookContentMetadata) Scan(value interface{}) error {
+func (m *BookContentMetadata) Scan(value any) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")

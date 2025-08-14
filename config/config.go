@@ -40,6 +40,10 @@ func Initialize() {
 
 		DevInternalClientID:  os.Getenv("DEV_INTERNAL_CLIENT_ID"),
 		DevInternalSecretKey: os.Getenv("DEV_INTERNAL_SECRET_KEY"),
+
+		MidtransMerchantID: os.Getenv("MIDTRANS_MERCHANT_ID"),
+		MidtransClientKey:  os.Getenv("MIDTRANS_CLIENT_KEY"),
+		MidtransServerKey:  os.Getenv("MIDTRANS_SERVER_KEY"),
 	}
 }
 

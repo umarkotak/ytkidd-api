@@ -8,9 +8,9 @@ import (
 )
 
 type ResponseBody struct {
-	Data    interface{} `json:"data"`
-	Success bool        `json:"success"`
-	Error   ErrorData   `json:"error"`
+	Data    any       `json:"data"`
+	Success bool      `json:"success"`
+	Error   ErrorData `json:"error"`
 }
 
 type ErrorData struct {
@@ -19,7 +19,7 @@ type ErrorData struct {
 	InternalError string `json:"internal_error,omitempty"`
 }
 
-func Response(w http.ResponseWriter, r *http.Request, statusCode int, data interface{}) {
+func Response(w http.ResponseWriter, r *http.Request, statusCode int, data any) {
 	if data == nil {
 		data = map[string]any{}
 	}
@@ -70,7 +70,7 @@ func RawError(w http.ResponseWriter, r *http.Request, statusCode int, err error,
 	}
 
 	res := ResponseBody{
-		Data:    map[string]interface{}{},
+		Data:    map[string]any{},
 		Success: true,
 		Error: ErrorData{
 			Code:    errCode,
