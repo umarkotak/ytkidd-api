@@ -5,10 +5,15 @@ import (
 	"database/sql"
 	"fmt"
 	"slices"
+	"time"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/datastore"
 	"github.com/umarkotak/ytkidd-api/model"
 	"github.com/umarkotak/ytkidd-api/repos/order_repo"
+	"github.com/umarkotak/ytkidd-api/repos/product_repo"
+	"github.com/umarkotak/ytkidd-api/repos/user_subscription_repo"
 )
 
 var (
@@ -84,6 +89,36 @@ func ProcessOrderBenefit(ctx context.Context, orderNumber string) error {
 }
 
 func giveBenefitSubscription(ctx context.Context, order model.Order) error {
+	product, err := product_repo.GetByCode(ctx, order.Metadata.ProductCode)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	err = datastore.Transaction(ctx, datastore.Get().Db, func(tx *sqlx.Tx) error {
+		now := time.Now()
+
+		user_subscription_repo.Insert(ctx, tx, model.UserSubscription{
+			UserID:      order.UserID,
+			OrderID:     order.ID,
+			ProductCode: product.Code,
+			StartedAt:   now,
+			EndedAt:     now.Add(time.Duration(product.Metadata.DurationDays+1) * 24 * time.Hour),
+		})
+
+		order.Status = model.ORDER_STATUS_COMPLETE
+		err = order_repo.Update(ctx, tx, order)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
 
 	return nil
 }

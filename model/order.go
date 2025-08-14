@@ -47,7 +47,9 @@ type (
 		Metadata       OrderMetadata  `db:"metadata"`
 	}
 
-	OrderMetadata struct{}
+	OrderMetadata struct {
+		ProductCode string `json:"product_code,omitempty"`
+	}
 )
 
 func (m *Order) GenNumber() {

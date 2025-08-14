@@ -32,6 +32,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/repos/order_repo"
 	"github.com/umarkotak/ytkidd-api/repos/product_repo"
 	"github.com/umarkotak/ytkidd-api/repos/user_repo"
+	"github.com/umarkotak/ytkidd-api/repos/user_subscription_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_channel_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
 	"github.com/umarkotak/ytkidd-api/utils/log_formatter"
@@ -157,6 +158,7 @@ func initializeDependencies() {
 	google_repo.Initialize()
 	product_repo.Initialize()
 	order_repo.Initialize()
+	user_subscription_repo.Initialize()
 
 	word_censor_lib.Initialize(word_censor_lib.WordCensorLib{
 		Words: []string{"kucing", "anjing", "gajah"},

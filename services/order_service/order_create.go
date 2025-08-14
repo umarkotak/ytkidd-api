@@ -38,7 +38,9 @@ func CreateOrder(ctx context.Context, params contract.CreateOrder) (resp_contrac
 		DiscountAmount: 0,
 		FinalPrice:     product.Price,
 		PaymentNumber:  sql.NullString{},
-		Metadata:       model.OrderMetadata{},
+		Metadata: model.OrderMetadata{
+			ProductCode: product.Code,
+		},
 	}
 	order.GenNumber()
 
