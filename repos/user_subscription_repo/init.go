@@ -39,7 +39,7 @@ var (
 			us.user_id = :user_id
 			AND us.deleted_at IS NULL
 		ORDER BY us.id DESC
-		LIMIT :limit OFFSET :offset
+		LIMIT 50
 	`, allColumns)
 
 	queryGetActiveByUserID = fmt.Sprintf(`
@@ -50,8 +50,7 @@ var (
 			us.user_id = :user_id
 			AND NOW() BETWEEN us.started_at AND us.ended_at
 			AND us.deleted_at IS NULL
-		ORDER BY us.id DESC
-		LIMIT :limit OFFSET :offset
+		ORDER BY us.id ASC
 	`, allColumns)
 
 	queryInsert = `
@@ -69,13 +68,26 @@ var (
 			:ended_at
 		) RETURNING id
 	`
+
+	queryGetUserLatestActiveSubscription = fmt.Sprintf(`
+		SELECT
+			%s
+		FROM user_subscriptions us
+		WHERE
+			us.user_id = :user_id
+			AND us.ended_at > NOW()
+			AND us.deleted_at IS NULL
+		ORDER BY us.id DESC
+		LIMIT 1
+	`, allColumns)
 )
 
 var (
-	stmtGetByID           *sqlx.NamedStmt
-	stmtGetByUserID       *sqlx.NamedStmt
-	stmtGetActiveByUserID *sqlx.NamedStmt
-	stmtInsert            *sqlx.NamedStmt
+	stmtGetByID                         *sqlx.NamedStmt
+	stmtGetByUserID                     *sqlx.NamedStmt
+	stmtGetActiveByUserID               *sqlx.NamedStmt
+	stmtInsert                          *sqlx.NamedStmt
+	stmtGetUserLatestActiveSubscription *sqlx.NamedStmt
 )
 
 func Initialize() {
@@ -94,6 +106,10 @@ func Initialize() {
 		logrus.Fatal(err)
 	}
 	stmtInsert, err = datastore.Get().Db.PrepareNamed(queryInsert)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	stmtGetUserLatestActiveSubscription, err = datastore.Get().Db.PrepareNamed(queryGetUserLatestActiveSubscription)
 	if err != nil {
 		logrus.Fatal(err)
 	}

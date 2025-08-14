@@ -45,7 +45,7 @@ func CreatePayment(ctx context.Context, tx *sqlx.Tx, params CreatePaymentParams)
 		return CreatePaymentData{}, fmt.Errorf("payment platform not supported")
 	}
 
-	items := make([]midtrans.ItemDetails, 1, len(params.OrderItems))
+	items := make([]midtrans.ItemDetails, 0, len(params.OrderItems))
 	for _, orderItem := range params.OrderItems {
 		items = append(items, midtrans.ItemDetails{
 			ID:    orderItem.ID,

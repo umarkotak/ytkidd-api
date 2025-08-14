@@ -95,15 +95,24 @@ func giveBenefitSubscription(ctx context.Context, order model.Order) error {
 		return err
 	}
 
+	latestActiveSubscription, err := user_subscription_repo.GetUserLatestActiveSubscription(ctx, order.UserID)
+	if err != nil && err != sql.ErrNoRows {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
 	err = datastore.Transaction(ctx, datastore.Get().Db, func(tx *sqlx.Tx) error {
-		now := time.Now()
+		start := time.Now()
+		if latestActiveSubscription.EndedAt.After(start) {
+			start = latestActiveSubscription.EndedAt
+		}
 
 		user_subscription_repo.Insert(ctx, tx, model.UserSubscription{
 			UserID:      order.UserID,
 			OrderID:     order.ID,
 			ProductCode: product.Code,
-			StartedAt:   now,
-			EndedAt:     now.Add(time.Duration(product.Metadata.DurationDays+1) * 24 * time.Hour),
+			StartedAt:   start,
+			EndedAt:     start.Add(time.Duration(product.Metadata.DurationDays+1) * 24 * time.Hour),
 		})
 
 		order.Status = model.ORDER_STATUS_COMPLETE

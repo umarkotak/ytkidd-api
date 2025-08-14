@@ -74,8 +74,10 @@ func CreateOrder(ctx context.Context, params contract.CreateOrder) (resp_contrac
 	}
 
 	return resp_contract.CreateOrder{
-		OrderNumber:       order.Number,
-		MidtransSnapToken: createPaymentData.MidtransSnapToken,
-		MidtransSnapUrl:   createPaymentData.MidtransSnapUrl,
+		OrderNumber:                order.Number,
+		MidtransSnapToken:          createPaymentData.MidtransSnapToken,
+		MidtransSnapUrl:            createPaymentData.MidtransSnapUrl,
+		MidtransSandboxPaymentPage: "https://simulator.sandbox.midtrans.com/v2/qris/index",
+		MidtransNotificationPage:   "https://dashboard.sandbox.midtrans.com/settings/vtweb_configuration/history",
 	}, nil
 }

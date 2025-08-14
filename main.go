@@ -211,7 +211,7 @@ func initializeHttpServer() {
 		rUserAuth.Post("/order/create", order_handler.PostCreateOrder)
 		rUserAuth.Post("/order/pay", ping_handler.ToDo)
 
-		ri.Post("/midtrans/callback", payment_lib.MidtransCallbackHandler)
+		ri.Post("/midtrans/callback/transaction", payment_lib.MidtransCallbackHandler)
 
 		ri.Get("/file_bucket/{guid}", file_bucket_handler.GetByGuid)
 	})
