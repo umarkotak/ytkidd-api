@@ -48,3 +48,11 @@ func MyProfile(w http.ResponseWriter, r *http.Request) {
 
 	render.Response(w, r, 200, commonCtx)
 }
+
+func MySubscription(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	commonCtx := common_ctx.GetFromCtx(ctx)
+
+	render.Response(w, r, 200, commonCtx)
+}

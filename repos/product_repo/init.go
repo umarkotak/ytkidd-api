@@ -24,6 +24,15 @@ var (
 		"p.metadata",
 	}, ", ")
 
+	queryGetAll = fmt.Sprintf(`
+		SELECT
+			%s
+		FROM products p
+		WHERE
+			p.deleted_at IS NULL
+		ORDER BY p.price ASC
+	`, allColumns)
+
 	queryGetByID = fmt.Sprintf(`
 		SELECT
 			%s
@@ -44,6 +53,7 @@ var (
 )
 
 var (
+	stmtGetAll    *sqlx.NamedStmt
 	stmtGetByID   *sqlx.NamedStmt
 	stmtGetByCode *sqlx.NamedStmt
 )
@@ -51,6 +61,10 @@ var (
 func Initialize() {
 	var err error
 
+	stmtGetAll, err = datastore.Get().Db.PrepareNamed(queryGetAll)
+	if err != nil {
+		logrus.Fatal(err)
+	}
 	stmtGetByID, err = datastore.Get().Db.PrepareNamed(queryGetByID)
 	if err != nil {
 		logrus.Fatal(err)

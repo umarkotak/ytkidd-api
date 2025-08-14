@@ -20,6 +20,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/handlers/file_bucket_handler.go"
 	"github.com/umarkotak/ytkidd-api/handlers/order_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/ping_handler"
+	"github.com/umarkotak/ytkidd-api/handlers/product_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/user_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_channel_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/youtube_handler"
@@ -206,7 +207,9 @@ func initializeHttpServer() {
 		ri.Post("/user/sign_in", user_handler.SignIn)
 		rUserAuth.Get("/user/check_auth", user_handler.CheckAuth)
 		rUserAuth.Get("/user/profile", user_handler.MyProfile)
-		rUserAuth.Get("/user/subscription", ping_handler.ToDo)
+		rUserAuth.Get("/user/subscription", user_handler.MySubscription)
+
+		ri.Get("/products", product_handler.GetProducts)
 
 		rUserAuth.Post("/order/create", order_handler.PostCreateOrder)
 		rUserAuth.Post("/order/pay", ping_handler.ToDo)
