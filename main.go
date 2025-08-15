@@ -17,7 +17,6 @@ import (
 	"github.com/umarkotak/ytkidd-api/handlers/ai_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/book_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/comfy_ui_handler"
-	"github.com/umarkotak/ytkidd-api/handlers/file_bucket_handler.go"
 	"github.com/umarkotak/ytkidd-api/handlers/order_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/ping_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/product_handler"
@@ -183,6 +182,7 @@ func initializeHttpServer() {
 		// rDevInternal := ri.With(middlewares.InternalDevAuth)
 		rUserAuth := ri.With(middlewares.UserAuth)
 		rOptionalUserAuth := ri.With(middlewares.OptionalUserAuth)
+		rAdminAuth := ri.With(middlewares.UserAuthAdmin)
 
 		ri.Get("/ping", ping_handler.Ping)
 
@@ -195,11 +195,11 @@ func initializeHttpServer() {
 
 		ri.Post("/youtube/scrap_videos", youtube_handler.ScrapVideos)
 
-		ri.Post("/books/insert_from_pdf", book_handler.InsertFromPdf)
-		ri.Post("/books/insert_from_pdf_urls", book_handler.InsertFromPdfUrls)
+		rAdminAuth.Post("/books/insert_from_pdf", book_handler.InsertFromPdf)
+		rAdminAuth.Post("/books/insert_from_pdf_urls", book_handler.InsertFromPdfUrls)
 		rOptionalUserAuth.Get("/books", book_handler.GetBooks)
 		rOptionalUserAuth.Get("/book/{id}", book_handler.GetBookDetail)
-		ri.Delete("/book/{id}", book_handler.DeleteBook)
+		rAdminAuth.Delete("/book/{id}", book_handler.DeleteBook)
 
 		ri.Get("/comfy_ui/output", comfy_ui_handler.Gallery)
 		ri.Post("/ai/chat", ai_handler.Chat)
@@ -217,8 +217,6 @@ func initializeHttpServer() {
 		rUserAuth.Get("/order/{order_number}", order_handler.GetOrderDetail)
 
 		ri.Post("/midtrans/callback/transaction", payment_lib.MidtransCallbackHandler)
-
-		ri.Get("/file_bucket/{guid}", file_bucket_handler.GetByGuid)
 	})
 
 	r.Get("/file_bucket/*", func(w http.ResponseWriter, r *http.Request) {

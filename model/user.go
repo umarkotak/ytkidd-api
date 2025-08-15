@@ -12,8 +12,9 @@ const (
 	GENDER_MALE   = "male"
 	GENDER_FEMALE = "female"
 
-	USER_ROLE_BASIC = "basic"
-	USER_ROLE_ADMIN = "admin"
+	USER_ROLE_BASIC      = "basic"
+	USER_ROLE_SUPERADMIN = "superadmin"
+	USER_ROLE_ADMIN      = "admin"
 )
 
 var (

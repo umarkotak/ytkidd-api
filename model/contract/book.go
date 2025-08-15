@@ -12,6 +12,7 @@ type (
 		BookType       string
 		OriginalPdfUrl string
 		Storage        string // Enum: local, r2
+		StorePdf       bool
 	}
 
 	InsertFromPdfUrl struct {
@@ -21,7 +22,8 @@ type (
 		Description string `json:"description"`
 		ImgFormat   string `json:"img_format"`
 		BookType    string `json:"book_type"`
-		Storage     string // Enum: local, r2
+		Storage     string `json:"storage"`
+		StorePdf    bool   `json:"store_pdf"`
 	}
 
 	GetBooks struct {

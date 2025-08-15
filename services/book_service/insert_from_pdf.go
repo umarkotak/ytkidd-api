@@ -90,10 +90,12 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 
 	bookObjectKey := fmt.Sprintf("books/%s/book.pdf", params.Slug)
 	if params.Storage == model.STORAGE_R2 {
-		err = datastore.UploadFileToR2(ctx, pdfFilePath, bookObjectKey, false)
-		if err != nil {
-			logrus.WithContext(ctx).Error(err)
-			return err
+		if params.StorePdf {
+			err = datastore.UploadFileToR2(ctx, pdfFilePath, bookObjectKey, false)
+			if err != nil {
+				logrus.WithContext(ctx).Error(err)
+				return err
+			}
 		}
 	}
 
@@ -202,6 +204,13 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return err
+	}
+
+	if !params.StorePdf {
+		err = utils.DeleteFileIfExists(pdfFilePath)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+		}
 	}
 
 	return nil
