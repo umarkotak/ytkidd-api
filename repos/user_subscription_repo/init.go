@@ -53,6 +53,17 @@ var (
 		ORDER BY us.id ASC
 	`, allColumns)
 
+	queryGetAllActiveByUserID = fmt.Sprintf(`
+		SELECT
+			%s
+		FROM user_subscriptions us
+		WHERE
+			us.user_id = :user_id
+			AND us.ended_at > NOW()
+			AND us.deleted_at IS NULL
+		ORDER BY us.id ASC
+	`, allColumns)
+
 	queryInsert = `
 		INSERT INTO user_subscriptions (
 			user_id,
@@ -86,6 +97,7 @@ var (
 	stmtGetByID                         *sqlx.NamedStmt
 	stmtGetByUserID                     *sqlx.NamedStmt
 	stmtGetActiveByUserID               *sqlx.NamedStmt
+	stmtGetAllActiveByUserID            *sqlx.NamedStmt
 	stmtInsert                          *sqlx.NamedStmt
 	stmtGetUserLatestActiveSubscription *sqlx.NamedStmt
 )
@@ -102,6 +114,10 @@ func Initialize() {
 		logrus.Fatal(err)
 	}
 	stmtGetActiveByUserID, err = datastore.Get().Db.PrepareNamed(queryGetActiveByUserID)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	stmtGetAllActiveByUserID, err = datastore.Get().Db.PrepareNamed(queryGetAllActiveByUserID)
 	if err != nil {
 		logrus.Fatal(err)
 	}

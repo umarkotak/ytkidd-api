@@ -8,6 +8,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/model/contract"
 	"github.com/umarkotak/ytkidd-api/services/book_service"
 	"github.com/umarkotak/ytkidd-api/utils"
+	"github.com/umarkotak/ytkidd-api/utils/common_ctx"
 	"github.com/umarkotak/ytkidd-api/utils/render"
 )
 
@@ -31,8 +32,11 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 func GetBookDetail(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	commonCtx := common_ctx.GetFromCtx(ctx)
+
 	params := contract.GetBooks{
-		BookID: utils.StringMustInt64(chi.URLParam(r, "id")),
+		UserGuid: commonCtx.UserAuth.GUID,
+		BookID:   utils.StringMustInt64(chi.URLParam(r, "id")),
 	}
 
 	bookDetail, err := book_service.GetBookDetail(ctx, params)

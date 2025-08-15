@@ -182,7 +182,7 @@ func initializeHttpServer() {
 	r.Route("/ytkidd/api", func(ri chi.Router) {
 		// rDevInternal := ri.With(middlewares.InternalDevAuth)
 		rUserAuth := ri.With(middlewares.UserAuth)
-		// rOptionalUserAuth := ri.With(middlewares.OptionalUserAuth)
+		rOptionalUserAuth := ri.With(middlewares.OptionalUserAuth)
 
 		ri.Get("/ping", ping_handler.Ping)
 
@@ -197,8 +197,8 @@ func initializeHttpServer() {
 
 		ri.Post("/books/insert_from_pdf", book_handler.InsertFromPdf)
 		ri.Post("/books/insert_from_pdf_urls", book_handler.InsertFromPdfUrls)
-		ri.Get("/books", book_handler.GetBooks)
-		ri.Get("/book/{id}", book_handler.GetBookDetail)
+		rOptionalUserAuth.Get("/books", book_handler.GetBooks)
+		rOptionalUserAuth.Get("/book/{id}", book_handler.GetBookDetail)
 		ri.Delete("/book/{id}", book_handler.DeleteBook)
 
 		ri.Get("/comfy_ui/output", comfy_ui_handler.Gallery)
@@ -212,7 +212,9 @@ func initializeHttpServer() {
 		ri.Get("/products", product_handler.GetProducts)
 
 		rUserAuth.Post("/order/create", order_handler.PostCreateOrder)
-		rUserAuth.Post("/order/pay", ping_handler.ToDo)
+		rUserAuth.Post("/order/{order_number}/payment/check", order_handler.PostCheckOrderPayment)
+		rUserAuth.Get("/order/list", order_handler.GetOrderList)
+		rUserAuth.Get("/order/{order_number}", order_handler.GetOrderDetail)
 
 		ri.Post("/midtrans/callback/transaction", payment_lib.MidtransCallbackHandler)
 

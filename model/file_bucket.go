@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+const (
+	STORAGE_LOCAL = "local"
+	STORAGE_R2    = "r2"
+)
+
 type (
 	FileBucket struct {
 		ID              int64              `db:"id"`
@@ -22,6 +27,8 @@ type (
 		Metadata        FileBucketMetadata `db:"metadata"`
 		Data            []byte             `db:"data"`
 		ExactPath       string             `db:"exact_path"`
+		Storage         string             `db:"storage"`
+		SizeKb          int64              `db:"size_kb"`
 	}
 
 	FileBucketMetadata struct {

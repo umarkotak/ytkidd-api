@@ -43,6 +43,18 @@ func GetActiveByUserID(ctx context.Context, userID int64) ([]model.UserSubscript
 	return objs, nil
 }
 
+func GetAllActiveByUserID(ctx context.Context, userID int64) ([]model.UserSubscription, error) {
+	objs := []model.UserSubscription{}
+	err := stmtGetAllActiveByUserID.SelectContext(ctx, &objs, map[string]any{
+		"user_id": userID,
+	})
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return objs, err
+	}
+	return objs, nil
+}
+
 func GetUserLatestActiveSubscription(ctx context.Context, userID int64) (model.UserSubscription, error) {
 	obj := model.UserSubscription{}
 	err := stmtGetUserLatestActiveSubscription.GetContext(ctx, &obj, map[string]any{

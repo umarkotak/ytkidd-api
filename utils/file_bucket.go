@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/umarkotak/ytkidd-api/config"
 )
@@ -28,8 +30,8 @@ func GenFileUrl(guid string) string {
 	return fmt.Sprintf("%s/ytkidd/api/file_bucket/%s", config.Get().AppHost, guid)
 }
 
-func GenRawFileUrl(fileBucketPath string) string {
-	return fmt.Sprintf("%s/%s", config.Get().AppHost, fileBucketPath)
+func GenRawFileUrl(bucketName, fileBucketPath string) string {
+	return fmt.Sprintf("%s/%s/%s", config.Get().AppHost, bucketName, fileBucketPath)
 }
 
 func DeleteFileIfExists(filePath string) error {
@@ -43,4 +45,39 @@ func DeleteFileIfExists(filePath string) error {
 		return err
 	}
 	return nil
+}
+
+var errDangerousPath = errors.New("refusing to delete dangerous path")
+
+// DeleteFolder deletes a directory and everything inside it.
+// It refuses to delete "", ".", root, or the current working dir.
+func DeleteFolder(path string) error {
+	if path == "" || path == "." || path == "/" || path == `\` {
+		return errDangerousPath
+	}
+
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
+
+	// Extra guard: don't allow deleting the current working directory.
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	if abs == cwd || abs == string(filepath.Separator) {
+		return errDangerousPath
+	}
+
+	// Optional: ensure it exists and is a directory (gives nicer errors)
+	info, err := os.Lstat(abs)
+	if err != nil {
+		return err
+	}
+	if !info.IsDir() {
+		return errors.New("path is not a directory")
+	}
+
+	return os.RemoveAll(abs)
 }

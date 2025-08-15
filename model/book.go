@@ -2,9 +2,15 @@ package model
 
 import (
 	"database/sql"
+	"slices"
 	"time"
 
 	"github.com/lib/pq"
+)
+
+const (
+	ACCESS_TAG_FREE  = "free"
+	ACCESS_TAG_BASIC = "basic"
 )
 
 type (
@@ -22,7 +28,13 @@ type (
 		PdfFileGuid    string         `db:"pdf_file_guid"`
 		Active         bool           `db:"active"`
 		OriginalPdfUrl string         `db:"original_pdf_url"`
+		AccessTags     pq.StringArray `db:"access_tags"`
+		Storage        string         `db:"storage"`
 
 		CoverFilePath string `db:"cover_file_path"` // join from file bucket
 	}
 )
+
+func (m Book) IsFree() bool {
+	return slices.Contains(m.AccessTags, ACCESS_TAG_FREE)
+}

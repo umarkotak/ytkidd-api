@@ -61,11 +61,12 @@ func GetByParams(ctx context.Context, params contract.GetYoutubeVideos) ([]model
 		params.ExcludeChannelIDs = []int64{}
 	}
 
-	if params.Sort == "" {
+	switch params.Sort {
+	case "":
 		params.Sort = "RANDOM()"
-	} else if params.Sort == "id_desc" {
+	case "id_desc":
 		params.Sort = "ytvid.id DESC"
-	} else {
+	default:
 		params.Sort = "RANDOM()"
 	}
 

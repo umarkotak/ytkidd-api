@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -23,23 +22,84 @@ import (
 )
 
 func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
-	err := utils.CreateFolderIfNotExists(fmt.Sprintf("%s/book_pdfs", config.Get().FileBucketPath))
+	var err error
+
+	if params.Storage == "" {
+		params.Storage = model.STORAGE_LOCAL
+	}
+
+	bookDir := fmt.Sprintf("%s/books/%s", config.Get().FileBucketPath, params.Slug)
+
+	err = utils.CreateFolderIfNotExists(bookDir)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return err
 	}
+	defer func() {
+		if err != nil {
+			utils.DeleteFolder(bookDir)
+			if params.Storage == model.STORAGE_R2 {
+				datastore.DeleteObjectsByPrefix(ctx, fmt.Sprintf("books/%s", params.Slug))
+			}
+		}
+		if params.Storage == model.STORAGE_R2 {
+			utils.DeleteFolder(bookDir)
+		}
+	}()
 
-	pdfDir := fmt.Sprintf("%s/book_pdfs", config.Get().FileBucketPath)
-
-	pdfFilePath := fmt.Sprintf("%s/uploaded-%v.pdf", pdfDir, params.Slug)
+	pdfFilePath := fmt.Sprintf("%s/book.pdf", bookDir)
 	err = os.WriteFile(pdfFilePath, params.PdfBytes, 0644)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return err
 	}
 
+	outputPattern := filepath.Join(bookDir, "%d.jpeg")
+	gsArgs := []string{
+		"-dNOPAUSE",     //
+		"-dBATCH",       //
+		"-dSAFER",       //
+		"-sDEVICE=jpeg", //
+		"-dJPEGQ=90",    //
+		"-r225",         // Resolution in DPI
+		fmt.Sprintf("-sOutputFile=%s", outputPattern), //
+		pdfFilePath, //
+	}
+
+	cmd := exec.Command("/opt/homebrew/bin/gs", gsArgs...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		logrus.WithContext(ctx).WithFields(logrus.Fields{
+			"cmd_output": output,
+		}).Error(err)
+		return err
+	}
+
+	pattern := filepath.Join(bookDir, "*.jpeg")
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	if len(matches) == 0 {
+		err = fmt.Errorf("empty pages")
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	bookObjectKey := fmt.Sprintf("books/%s/book.pdf", params.Slug)
+	if params.Storage == model.STORAGE_R2 {
+		err = datastore.UploadFileToR2(ctx, pdfFilePath, bookObjectKey, false)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+	}
+
 	successFilePaths := []string{}
 	err = datastore.Transaction(ctx, datastore.Get().Db, func(tx *sqlx.Tx) error {
+		pdfFileGuid := random.MustGenUUIDTimes(2)
 		bookType := "default"
 		if params.BookType != "" {
 			bookType = params.BookType
@@ -51,71 +111,57 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			CoverFileGuid:  "",
 			Tags:           pq.StringArray{},
 			Type:           bookType,
-			PdfFileGuid:    pdfFilePath,
+			PdfFileGuid:    pdfFileGuid,
 			Active:         true,
 			OriginalPdfUrl: params.OriginalPdfUrl,
+			AccessTags:     pq.StringArray{model.ACCESS_TAG_FREE, model.ACCESS_TAG_BASIC},
+			Storage:        params.Storage,
 		}
 		book.ID, err = book_repo.Insert(ctx, tx, book)
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
 			return err
 		}
-
-		err = utils.CreateFolderIfNotExists(fmt.Sprintf("%s/book_contents", config.Get().FileBucketPath))
+		_, _, err = file_bucket_repo.Insert(ctx, tx, model.FileBucket{
+			Guid:            pdfFileGuid,
+			Name:            params.Slug,
+			BaseType:        "application",
+			Extension:       "pdf",
+			HttpContentType: "application/pdf",
+			Metadata:        model.FileBucketMetadata{},
+			Data:            []byte{},
+			ExactPath:       bookObjectKey,
+			Storage:         params.Storage,
+			SizeKb:          0,
+		})
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
 			return err
 		}
 
 		coverFileGuid := ""
-
-		outputDir := fmt.Sprintf("%s/book_contents", config.Get().FileBucketPath)
-		baseName := fmt.Sprintf("%d_%s", time.Now().UnixMilli(), params.Slug)
-		outputPattern := filepath.Join(outputDir, fmt.Sprintf("%s-%%d.jpeg", baseName))
-		gsArgs := []string{
-			"-dNOPAUSE",     //
-			"-dBATCH",       //
-			"-dSAFER",       //
-			"-sDEVICE=jpeg", //
-			"-dJPEGQ=90",    //
-			"-r225",         // Resolution in DPI
-			fmt.Sprintf("-sOutputFile=%s", outputPattern), //
-			pdfFilePath, //
-		}
-
-		cmd := exec.Command("/opt/homebrew/bin/gs", gsArgs...)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			logrus.WithContext(ctx).WithFields(logrus.Fields{
-				"cmd_output": output,
-			}).Error(err)
-			return err
-		}
-
-		pattern := filepath.Join(outputDir, fmt.Sprintf("%s-*.jpeg", baseName))
-		matches, err := filepath.Glob(pattern)
-		if err != nil {
-			logrus.WithContext(ctx).Error(err)
-			return err
-		}
-
-		if len(matches) == 0 {
-			err = fmt.Errorf("empty pages")
-			logrus.WithContext(ctx).Error(err)
-			return err
-		}
-
 		for idx, filePath := range matches {
+			bookContentObjectKey := fmt.Sprintf("books/%s/%v.jpeg", params.Slug, idx+1)
+			if params.Storage == model.STORAGE_R2 {
+				err = datastore.UploadFileToR2(ctx, filePath, bookContentObjectKey, false)
+				if err != nil {
+					logrus.WithContext(ctx).Error(err)
+					return err
+				}
+			}
+
 			guid := random.MustGenUUIDTimes(2)
 			fileBucket := model.FileBucket{
 				Guid:            guid,
-				Name:            fmt.Sprintf("book %v - page %v", book.ID, idx),
+				Name:            fmt.Sprintf("book %v - page %v", book.ID, idx+1),
 				BaseType:        "image",
 				Extension:       "jpeg",
 				HttpContentType: "image/jpeg",
 				Metadata:        model.FileBucketMetadata{},
 				Data:            []byte{},
-				ExactPath:       filePath,
+				ExactPath:       bookContentObjectKey,
+				Storage:         params.Storage,
+				SizeKb:          0,
 			}
 			_, fileGuid, err := file_bucket_repo.Insert(ctx, tx, fileBucket)
 			if err != nil {
@@ -154,14 +200,6 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 		return nil
 	})
 	if err != nil {
-		// clean up successfully uploaded file
-		for _, successFilePath := range successFilePaths {
-			err = os.Remove(successFilePath)
-			if err != nil {
-				logrus.WithContext(context.Background()).Error(err)
-			}
-		}
-
 		logrus.WithContext(ctx).Error(err)
 		return err
 	}

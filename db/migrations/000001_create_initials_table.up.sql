@@ -112,6 +112,9 @@ CREATE TABLE IF NOT EXISTS book_contents (
   CONSTRAINT fk_book_id FOREIGN KEY (book_id) REFERENCES books(id)
 );
 ALTER SEQUENCE book_contents_id_seq RESTART WITH 1;
+ALTER TABLE books
+  ADD storage TEXT NOT NULL DEFAULT 'local',
+  ADD access_tags TEXT [] NOT NULL DEFAULT '{free}';
 
 CREATE TABLE IF NOT EXISTS file_bucket (
   id SERIAL PRIMARY KEY,
@@ -129,6 +132,9 @@ CREATE TABLE IF NOT EXISTS file_bucket (
   exact_path TEXT
 );
 ALTER SEQUENCE file_bucket_id_seq RESTART WITH 1;
+ALTER TABLE file_bucket
+  ADD storage TEXT NOT NULL DEFAULT 'local',
+  ADD size_kb BIGINT NOT NULL DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS orders (
   id SERIAL PRIMARY KEY,

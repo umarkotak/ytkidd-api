@@ -22,6 +22,8 @@ var (
 		"fb.http_content_type",
 		"fb.metadata",
 		"fb.exact_path",
+		"fb.storage",
+		"fb.size_kb",
 	}, ", ")
 
 	allColumnsWithData = strings.Join([]string{
@@ -36,6 +38,8 @@ var (
 		"fb.http_content_type",
 		"fb.metadata",
 		"fb.exact_path",
+		"fb.storage",
+		"fb.size_kb",
 		"fb.data",
 	}, ", ")
 
@@ -75,7 +79,9 @@ var (
 			http_content_type,
 			metadata,
 			data,
-			exact_path
+			exact_path,
+			storage,
+			size_kb
 		) VALUES (
 			:guid,
 			:name,
@@ -84,7 +90,9 @@ var (
 			:http_content_type,
 			:metadata,
 			:data,
-			:exact_path
+			:exact_path,
+			:storage,
+			:size_kb
 		) RETURNING id
 	`
 

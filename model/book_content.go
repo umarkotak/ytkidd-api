@@ -20,6 +20,7 @@ type (
 		Description   string              `db:"description"`
 		Metadata      BookContentMetadata `db:"metadata"`
 
+		ImageStorage  string `db:"image_storage"`
 		ImageFilePath string `db:"image_file_path"`
 	}
 

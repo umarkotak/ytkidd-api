@@ -12,6 +12,7 @@ type (
 		CoverFileUrl string   `json:"cover_file_url"`
 		Tags         []string `json:"tags"`
 		Type         string   `json:"type"`
+		IsFree       bool     `json:"is_free"`
 	}
 
 	BookDetail struct {

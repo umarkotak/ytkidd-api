@@ -31,5 +31,11 @@ type (
 		MidtransMerchantID string
 		MidtransClientKey  string
 		MidtransServerKey  string
+
+		R2TokenValue      string
+		R2AccessKeyId     string
+		R2AccessKeySecret string
+		R2StorageEndpoint string
+		R2BucketName      string
 	}
 )

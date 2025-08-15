@@ -11,6 +11,7 @@ type (
 		ImgFormat      string
 		BookType       string
 		OriginalPdfUrl string
+		Storage        string // Enum: local, r2
 	}
 
 	InsertFromPdfUrl struct {
@@ -20,13 +21,15 @@ type (
 		Description string `json:"description"`
 		ImgFormat   string `json:"img_format"`
 		BookType    string `json:"book_type"`
+		Storage     string // Enum: local, r2
 	}
 
 	GetBooks struct {
-		BookID int64          `db:"-"`
-		Title  string         `db:"title"`
-		Tags   pq.StringArray `db:"tags"`
-		Types  pq.StringArray `db:"types"`
+		UserGuid string         `db:"-"`
+		BookID   int64          `db:"-"`
+		Title    string         `db:"title"`
+		Tags     pq.StringArray `db:"tags"`
+		Types    pq.StringArray `db:"types"`
 	}
 
 	DeleteBook struct {

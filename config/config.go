@@ -44,6 +44,12 @@ func Initialize() {
 		MidtransMerchantID: os.Getenv("MIDTRANS_MERCHANT_ID"),
 		MidtransClientKey:  os.Getenv("MIDTRANS_CLIENT_KEY"),
 		MidtransServerKey:  os.Getenv("MIDTRANS_SERVER_KEY"),
+
+		R2TokenValue:      os.Getenv("R2_TOKEN_VALUE"),
+		R2AccessKeyId:     os.Getenv("R2_ACCESS_KEY_ID"),
+		R2AccessKeySecret: os.Getenv("R2_ACCESS_KEY_SECRET"),
+		R2StorageEndpoint: os.Getenv("R2_STORAGE_ENDPOINT"),
+		R2BucketName:      getEnvStringWithDefault("R2_BUCKET_NAME", "cabocil-bucket"),
 	}
 }
 

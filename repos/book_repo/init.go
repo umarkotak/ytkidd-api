@@ -24,6 +24,8 @@ var (
 		"b.pdf_file_guid",
 		"b.active",
 		"b.original_pdf_url",
+		"b.access_tags",
+		"b.storage",
 	}, ", ")
 
 	queryGetByID = fmt.Sprintf(`
@@ -62,7 +64,9 @@ var (
 			tags,
 			type,
 			pdf_file_guid,
-			original_pdf_url
+			original_pdf_url,
+			access_tags,
+			storage
 		) VALUES (
 			:slug,
 			:title,
@@ -71,7 +75,9 @@ var (
 			:tags,
 			:type,
 			:pdf_file_guid,
-			:original_pdf_url
+			:original_pdf_url,
+			:access_tags,
+			:storage
 		) RETURNING id
 	`
 
@@ -85,7 +91,9 @@ var (
 			tags = :tags,
 			type = :type,
 			pdf_file_guid = :pdf_file_guid,
-			original_pdf_url = :original_pdf_url
+			original_pdf_url = :original_pdf_url,
+			access_tags = :access_tags,
+			storage = :storage
 		WHERE
 			id = :id
 	`

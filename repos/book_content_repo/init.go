@@ -34,6 +34,7 @@ var (
 	queryGetByBookID = fmt.Sprintf(`
 		SELECT
 			%s,
+			fb.storage AS image_storage,
 			COALESCE(fb.exact_path, '') AS image_file_path
 		FROM book_contents bc
 		INNER JOIN file_bucket fb ON fb.guid = bc.image_file_guid

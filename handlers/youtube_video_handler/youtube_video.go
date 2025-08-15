@@ -20,6 +20,7 @@ func GetYoutubeVideos(w http.ResponseWriter, r *http.Request) {
 		ChannelIDs:        utils.StringMustSliceInt64(r.URL.Query().Get("channel_ids"), ","),
 		ExcludeIDs:        utils.StringMustSliceInt64(r.URL.Query().Get("exclude_ids"), ","),
 		ExcludeChannelIDs: utils.StringMustSliceInt64(r.URL.Query().Get("exclude_channel_ids"), ","),
+		Sort:              r.URL.Query().Get("sort"),
 		Pagination: model.Pagination{
 			Limit: utils.StringMustInt64(r.URL.Query().Get("limit")),
 			Page:  utils.StringMustInt64(r.URL.Query().Get("page")),

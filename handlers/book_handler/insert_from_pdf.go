@@ -77,6 +77,7 @@ func InsertFromPdf(w http.ResponseWriter, r *http.Request) {
 		PdfBytes:    pdfBytes,
 		ImgFormat:   r.FormValue("img_format"),
 		BookType:    r.FormValue("book_type"),
+		Storage:     r.FormValue("storage"),
 	}
 
 	err = book_service.InsertFromPdf(ctx, params)
@@ -141,6 +142,7 @@ func InsertFromPdfUrls(w http.ResponseWriter, r *http.Request) {
 			ImgFormat:      oneParams.ImgFormat,
 			BookType:       oneParams.BookType,
 			OriginalPdfUrl: oneParams.PdfUrl,
+			Storage:        oneParams.Storage,
 		}
 		err = book_service.InsertFromPdf(ctx, insertFromPdfParams)
 		if err != nil {
