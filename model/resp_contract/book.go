@@ -2,7 +2,9 @@ package resp_contract
 
 type (
 	GetBooks struct {
-		Books []Book `json:"books"`
+		Tags        []string `json:"tags"`
+		PopularTags []string `json:"popular_tags"`
+		Books       []Book   `json:"books"`
 	}
 
 	Book struct {

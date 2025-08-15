@@ -47,12 +47,17 @@ var (
 		LEFT JOIN file_bucket fb ON fb.guid = b.cover_file_guid
 		WHERE
 			1 = 1
-			AND (:title = '' OR b.title = :title)
-			AND (:tags = '{}' OR b.tags @> :tags)
+			AND (:title = '' OR b.title ILIKE :title)
+			AND (:tags = '{}' OR b.tags && :tags)
 			AND (:types = '{}' OR b.type = ANY(:types))
 			AND b.active
 			AND b.deleted_at IS NULL
-		ORDER BY b.title ASC
+		ORDER BY
+			CASE WHEN :sort = 'title_asc' THEN b.title END ASC,
+			CASE WHEN :sort = 'title_desc' THEN b.title END DESC,
+			CASE WHEN :sort = 'id_asc' THEN b.id END ASC,
+			CASE WHEN :sort = 'id_desc' THEN b.id END DESC,
+			CASE WHEN :sort = 'random' THEN RANDOM() END
 	`, allColumns)
 
 	queryInsert = `
@@ -111,6 +116,14 @@ var (
 		WHERE
 			id = :id
 	`
+
+	queryGetTags = `
+		SELECT ARRAY_AGG(DISTINCT t.tag) AS unique_tags
+		FROM (
+			SELECT UNNEST(tags) AS tag
+			FROM books
+		) t;
+	`
 )
 
 var (
@@ -120,6 +133,7 @@ var (
 	stmtUpdate      *sqlx.NamedStmt
 	stmtSoftDelete  *sqlx.NamedStmt
 	stmtDelete      *sqlx.NamedStmt
+	stmtGetTags     *sqlx.NamedStmt
 )
 
 func Initialize() {
@@ -146,6 +160,10 @@ func Initialize() {
 		logrus.Fatal(err)
 	}
 	stmtDelete, err = datastore.Get().Db.PrepareNamed(queryDelete)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	stmtGetTags, err = datastore.Get().Db.PrepareNamed(queryGetTags)
 	if err != nil {
 		logrus.Fatal(err)
 	}

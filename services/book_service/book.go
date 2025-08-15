@@ -48,7 +48,13 @@ func GetBooks(ctx context.Context, params contract.GetBooks) (resp_contract.GetB
 		bookDatas = append(bookDatas, bookData)
 	}
 
+	tags, err := book_repo.GetTags(ctx)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+	}
+
 	return resp_contract.GetBooks{
+		Tags:  tags,
 		Books: bookDatas,
 	}, nil
 }

@@ -30,6 +30,7 @@ type (
 		Title    string         `db:"title"`
 		Tags     pq.StringArray `db:"tags"`
 		Types    pq.StringArray `db:"types"`
+		Sort     string         `db:"sort"`
 	}
 
 	DeleteBook struct {

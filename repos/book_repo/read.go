@@ -2,7 +2,9 @@ package book_repo
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/model"
 	"github.com/umarkotak/ytkidd-api/model/contract"
@@ -21,6 +23,9 @@ func GetByID(ctx context.Context, id int64) (model.Book, error) {
 }
 
 func GetByParams(ctx context.Context, params contract.GetBooks) ([]model.Book, error) {
+	if params.Title != "" {
+		params.Title = fmt.Sprintf("%%%s%%", params.Title)
+	}
 	if params.Tags == nil {
 		params.Tags = []string{}
 	}
@@ -35,4 +40,14 @@ func GetByParams(ctx context.Context, params contract.GetBooks) ([]model.Book, e
 		return objs, err
 	}
 	return objs, nil
+}
+
+func GetTags(ctx context.Context) ([]string, error) {
+	obj := pq.StringArray{}
+	err := stmtGetTags.GetContext(ctx, &obj, map[string]any{})
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return obj, err
+	}
+	return obj, nil
 }

@@ -16,7 +16,13 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	params := contract.GetBooks{
+		Title: r.URL.Query().Get("title"),
+		Tags:  utils.StringMustSliceString(r.URL.Query().Get("tags"), ","),
 		Types: utils.StringMustSliceString(r.URL.Query().Get("types"), ","),
+		Sort:  r.URL.Query().Get("sort"),
+	}
+	if params.Sort == "" {
+		params.Sort = "title_asc"
 	}
 
 	getBooks, err := book_service.GetBooks(ctx, params)
