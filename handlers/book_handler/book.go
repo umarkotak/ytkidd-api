@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/model"
 	"github.com/umarkotak/ytkidd-api/model/contract"
 	"github.com/umarkotak/ytkidd-api/services/book_service"
 	"github.com/umarkotak/ytkidd-api/utils"
@@ -20,10 +21,15 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 		Tags:  utils.StringMustSliceString(r.URL.Query().Get("tags"), ","),
 		Types: utils.StringMustSliceString(r.URL.Query().Get("types"), ","),
 		Sort:  r.URL.Query().Get("sort"),
+		Pagination: model.Pagination{
+			Limit: utils.StringMustInt64(r.URL.Query().Get("types")),
+			Page:  utils.StringMustInt64(r.URL.Query().Get("page")),
+		},
 	}
 	if params.Sort == "" {
 		params.Sort = "title_asc"
 	}
+	params.Pagination.SetDefault()
 
 	getBooks, err := book_service.GetBooks(ctx, params)
 	if err != nil {

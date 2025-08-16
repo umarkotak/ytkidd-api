@@ -1,6 +1,9 @@
 package contract
 
-import "github.com/lib/pq"
+import (
+	"github.com/lib/pq"
+	"github.com/umarkotak/ytkidd-api/model"
+)
 
 type (
 	InsertFromPdf struct {
@@ -33,6 +36,7 @@ type (
 		Tags     pq.StringArray `db:"tags"`
 		Types    pq.StringArray `db:"types"`
 		Sort     string         `db:"sort"`
+		model.Pagination
 	}
 
 	DeleteBook struct {

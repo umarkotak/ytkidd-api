@@ -58,6 +58,7 @@ var (
 			CASE WHEN :sort = 'id_asc' THEN b.id END ASC,
 			CASE WHEN :sort = 'id_desc' THEN b.id END DESC,
 			CASE WHEN :sort = 'random' THEN RANDOM() END
+		LIMIT :limit OFFSET :offset
 	`, allColumns)
 
 	queryInsert = `
