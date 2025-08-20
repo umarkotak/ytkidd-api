@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/midtrans/midtrans-go"
@@ -38,8 +39,14 @@ type (
 	}
 )
 
+var (
+	PaymentExpiry = int64(15)
+)
+
 func CreatePayment(ctx context.Context, tx *sqlx.Tx, params CreatePaymentParams) (CreatePaymentData, error) {
 	var err error
+
+	now := time.Now()
 
 	if params.PaymentPlatform != PAYMENT_PLATFORM_MIDTRANS {
 		return CreatePaymentData{}, fmt.Errorf("payment platform not supported")
@@ -69,6 +76,10 @@ func CreatePayment(ctx context.Context, tx *sqlx.Tx, params CreatePaymentParams)
 			Email: params.CustomerEmail,
 			Phone: params.CustomerPhone,
 		},
+		Expiry: &snap.ExpiryDetails{
+			Duration: PaymentExpiry,
+			Unit:     "minute",
+		},
 		Items: &items,
 	}
 
@@ -83,6 +94,7 @@ func CreatePayment(ctx context.Context, tx *sqlx.Tx, params CreatePaymentParams)
 	}
 
 	payment := Payment{
+		ExpiredAt:       sql.NullTime{now.Add(time.Minute * time.Duration(PaymentExpiry)), true},
 		OrderNumber:     params.OrderNumber,
 		PaymentPlatform: params.PaymentPlatform,
 		PaymentType:     params.PaymentType,
@@ -92,7 +104,10 @@ func CreatePayment(ctx context.Context, tx *sqlx.Tx, params CreatePaymentParams)
 		FraudStatus:     sql.NullString{},
 		MaskedCard:      sql.NullString{},
 		Amount:          params.Amount,
-		Metadata:        PaymentMetadata{},
+		Metadata: PaymentMetadata{
+			SnapToken: snapResp.Token,
+			SnapUrl:   snapResp.RedirectURL,
+		},
 	}
 
 	payment.ID, payment.Number, err = Insert(ctx, tx, payment)

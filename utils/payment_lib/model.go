@@ -18,6 +18,8 @@ type (
 		CreatedAt       time.Time       `db:"created_at"`
 		UpdatedAt       time.Time       `db:"updated_at"`
 		DeletedAt       sql.NullTime    `db:"deleted_at"`
+		ExpiredAt       sql.NullTime    `db:"expired_at"`
+		SuccessAt       sql.NullTime    `db:"success_at"`
 		OrderNumber     string          `db:"order_number"`
 		Number          string          `db:"number"`
 		PaymentPlatform string          `db:"payment_platform"`
@@ -51,7 +53,10 @@ type (
 		Acquirer          string         `json:"acquirer"`
 	}
 
-	PaymentMetadata struct{}
+	PaymentMetadata struct {
+		SnapToken string `json:"snap_token"`
+		SnapUrl   string `json:"snap_url"`
+	}
 )
 
 func (m *Payment) SyncStatus() {
@@ -77,6 +82,10 @@ func (m *Payment) SyncStatus() {
 		if m.FraudStatus.String == FRAUD_STATUS_DENY {
 			m.Status = STATUS_FAILED
 		}
+	}
+
+	if m.Status == STATUS_SUCCESS && m.SuccessAt.Time.IsZero() {
+		m.SuccessAt = sql.NullTime{time.Now(), true}
 	}
 }
 

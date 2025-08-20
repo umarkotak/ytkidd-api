@@ -23,6 +23,8 @@ var (
 		"py.created_at",
 		"py.updated_at",
 		"py.deleted_at",
+		"py.expired_at",
+		"py.success_at",
 		"py.order_number",
 		"py.number",
 		"py.payment_platform",
@@ -65,6 +67,8 @@ var (
 
 	queryInsert = `
 		INSERT INTO payments (
+			expired_at,
+			success_at,
 			order_number,
 			number,
 			payment_platform,
@@ -77,6 +81,8 @@ var (
 			amount,
 			metadata
 		) VALUES (
+			:expired_at,
+			:success_at,
 			:order_number,
 			:number,
 			:payment_platform,
@@ -95,6 +101,8 @@ var (
 		UPDATE payments
 		SET
 			updated_at = NOW(),
+			expired_at = :expired_at,
+			success_at = :success_at,
 			order_number = :order_number,
 			number = :number,
 			payment_platform = :payment_platform,
