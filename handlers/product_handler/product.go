@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/sirupsen/logrus"
-	"github.com/umarkotak/ytkidd-api/model/resp_contract"
+	"github.com/umarkotak/ytkidd-api/contract_resp"
 	"github.com/umarkotak/ytkidd-api/repos/product_repo"
 	"github.com/umarkotak/ytkidd-api/utils/render"
 )
@@ -19,9 +19,9 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	publicProducts := make([]resp_contract.PublicProduct, 0, len(products))
+	publicProducts := make([]contract_resp.PublicProduct, 0, len(products))
 	for _, product := range products {
-		publicProducts = append(publicProducts, resp_contract.PublicProduct{
+		publicProducts = append(publicProducts, contract_resp.PublicProduct{
 			Code:        product.Code,
 			BenefitType: product.BenefitType,
 			Name:        product.Name,

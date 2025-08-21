@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"github.com/sirupsen/logrus"
-	"github.com/umarkotak/ytkidd-api/model/contract"
-	"github.com/umarkotak/ytkidd-api/model/resp_contract"
+	"github.com/umarkotak/ytkidd-api/contract"
+	"github.com/umarkotak/ytkidd-api/contract_resp"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_channel_repo"
 )
 
-func GetChannels(ctx context.Context, params contract.GetYoutubeChannels) ([]resp_contract.YoutubeChannel, error) {
-	respYoutubeChannels := []resp_contract.YoutubeChannel{}
+func GetChannels(ctx context.Context, params contract.GetYoutubeChannels) ([]contract_resp.YoutubeChannel, error) {
+	respYoutubeChannels := []contract_resp.YoutubeChannel{}
 
 	youtubeChannels, err := youtube_channel_repo.GetForSearch(ctx, params)
 	if err != nil {
@@ -19,7 +19,7 @@ func GetChannels(ctx context.Context, params contract.GetYoutubeChannels) ([]res
 	}
 
 	for _, youtubeChannel := range youtubeChannels {
-		respYoutubeChannels = append(respYoutubeChannels, resp_contract.YoutubeChannel{
+		respYoutubeChannels = append(respYoutubeChannels, contract_resp.YoutubeChannel{
 			ID:         youtubeChannel.ID,
 			ImageUrl:   youtubeChannel.ImageUrl,
 			Name:       youtubeChannel.Name,

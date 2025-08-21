@@ -5,9 +5,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/contract"
+	"github.com/umarkotak/ytkidd-api/contract_resp"
 	"github.com/umarkotak/ytkidd-api/model"
-	"github.com/umarkotak/ytkidd-api/model/contract"
-	"github.com/umarkotak/ytkidd-api/model/resp_contract"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_channel_repo"
 	"github.com/umarkotak/ytkidd-api/services/youtube_channel_service"
 	"github.com/umarkotak/ytkidd-api/services/youtube_video_service"
@@ -57,7 +57,7 @@ func GetYoutubeChannelDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.Response(w, r, 200, map[string]any{
-		"channel": resp_contract.YoutubeChannel{
+		"channel": contract_resp.YoutubeChannel{
 			ID:       youtubeChannel.ID,
 			ImageUrl: youtubeChannel.ImageUrl,
 			Name:     youtubeChannel.Name,
@@ -80,7 +80,7 @@ func GetYoutubeChannelDetailed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.Response(w, r, 200,
-		resp_contract.YoutubeChannelDetailed{
+		contract_resp.YoutubeChannelDetailed{
 			ID:          youtubeChannel.ID,
 			CreatedAt:   youtubeChannel.CreatedAt,
 			UpdatedAt:   youtubeChannel.UpdatedAt,

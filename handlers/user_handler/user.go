@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/sirupsen/logrus"
-	"github.com/umarkotak/ytkidd-api/model/contract"
+	"github.com/umarkotak/ytkidd-api/contract"
 	"github.com/umarkotak/ytkidd-api/services/user_service"
 	"github.com/umarkotak/ytkidd-api/utils"
 	"github.com/umarkotak/ytkidd-api/utils/common_ctx"

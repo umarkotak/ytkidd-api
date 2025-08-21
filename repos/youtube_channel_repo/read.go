@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/contract"
 	"github.com/umarkotak/ytkidd-api/model"
-	"github.com/umarkotak/ytkidd-api/model/contract"
 )
 
 func GetByID(ctx context.Context, id int64) (model.YoutubeChannel, error) {

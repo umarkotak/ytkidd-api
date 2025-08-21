@@ -198,7 +198,8 @@ func initializeHttpServer() {
 		rAdminAuth.Post("/books/insert_from_pdf", book_handler.InsertFromPdf)
 		rAdminAuth.Post("/books/insert_from_pdf_urls", book_handler.InsertFromPdfUrls)
 		rOptionalUserAuth.Get("/books", book_handler.GetBooks)
-		rOptionalUserAuth.Get("/book/{id}", book_handler.GetBookDetail)
+		rOptionalUserAuth.Get("/book/{slug}", book_handler.GetBookDetail)
+		rAdminAuth.Patch("/book/{id}", book_handler.UpdateBook)
 		rAdminAuth.Delete("/book/{id}", book_handler.DeleteBook)
 
 		ri.Get("/comfy_ui/output", comfy_ui_handler.Gallery)

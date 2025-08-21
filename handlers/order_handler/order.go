@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/contract"
 	"github.com/umarkotak/ytkidd-api/model"
-	"github.com/umarkotak/ytkidd-api/model/contract"
 	"github.com/umarkotak/ytkidd-api/repos/user_repo"
 	"github.com/umarkotak/ytkidd-api/services/order_service"
 	"github.com/umarkotak/ytkidd-api/utils"

@@ -8,10 +8,10 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/config"
+	"github.com/umarkotak/ytkidd-api/contract"
+	"github.com/umarkotak/ytkidd-api/contract_resp"
 	"github.com/umarkotak/ytkidd-api/datastore"
 	"github.com/umarkotak/ytkidd-api/model"
-	"github.com/umarkotak/ytkidd-api/model/contract"
-	"github.com/umarkotak/ytkidd-api/model/resp_contract"
 	"github.com/umarkotak/ytkidd-api/repos/book_content_repo"
 	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/repos/file_bucket_repo"
@@ -20,14 +20,14 @@ import (
 	"github.com/umarkotak/ytkidd-api/utils"
 )
 
-func GetBooks(ctx context.Context, params contract.GetBooks) (resp_contract.GetBooks, error) {
+func GetBooks(ctx context.Context, params contract.GetBooks) (contract_resp.GetBooks, error) {
 	books, err := book_repo.GetByParams(ctx, params)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.GetBooks{}, err
+		return contract_resp.GetBooks{}, err
 	}
 
-	bookDatas := []resp_contract.Book{}
+	bookDatas := []contract_resp.Book{}
 	for _, book := range books {
 		var coverFileUrl string
 		if book.Storage == model.STORAGE_R2 {
@@ -36,8 +36,9 @@ func GetBooks(ctx context.Context, params contract.GetBooks) (resp_contract.GetB
 			coverFileUrl = utils.GenRawFileUrl(config.Get().FileBucketPath, book.CoverFilePath)
 		}
 
-		bookData := resp_contract.Book{
+		bookData := contract_resp.Book{
 			ID:           book.ID,
+			Slug:         book.Slug,
 			Title:        book.Title,
 			Description:  book.Description,
 			CoverFileUrl: coverFileUrl,
@@ -53,48 +54,55 @@ func GetBooks(ctx context.Context, params contract.GetBooks) (resp_contract.GetB
 		logrus.WithContext(ctx).Error(err)
 	}
 
-	return resp_contract.GetBooks{
-		Tags:  tags,
-		Books: bookDatas,
+	tagGroup := []contract_resp.TagGroup{
+		{
+			Name: "All Tags",
+			Tags: tags,
+		},
+	}
+
+	return contract_resp.GetBooks{
+		TagGroup: tagGroup,
+		Books:    bookDatas,
 	}, nil
 }
 
-func GetBookDetail(ctx context.Context, params contract.GetBooks) (resp_contract.BookDetail, error) {
-	book, err := book_repo.GetByID(ctx, params.BookID)
+func GetBookDetail(ctx context.Context, params contract.GetBooks) (contract_resp.BookDetail, error) {
+	book, err := book_repo.GetBySlug(ctx, params.Slug)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.BookDetail{}, err
+		return contract_resp.BookDetail{}, err
 	}
 
 	if !book.IsFree() {
 		if params.UserGuid == "" {
-			return resp_contract.BookDetail{}, model.ErrLoginRequired
+			return contract_resp.BookDetail{}, model.ErrLoginRequired
 		}
 
 		user, err := user_repo.GetByGuid(ctx, params.UserGuid)
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
-			return resp_contract.BookDetail{}, err
+			return contract_resp.BookDetail{}, err
 		}
 
 		subs, err := user_subscription_repo.GetActiveByUserID(ctx, user.ID)
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
-			return resp_contract.BookDetail{}, err
+			return contract_resp.BookDetail{}, err
 		}
 
 		if len(subs) <= 0 {
-			return resp_contract.BookDetail{}, model.ErrSubscriptionRequired
+			return contract_resp.BookDetail{}, model.ErrSubscriptionRequired
 		}
 	}
 
 	bookContents, err := book_content_repo.GetByBookID(ctx, book.ID)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.BookDetail{}, err
+		return contract_resp.BookDetail{}, err
 	}
 
-	bookContentDatas := []resp_contract.BookContent{}
+	bookContentDatas := []contract_resp.BookContent{}
 	for _, bookContent := range bookContents {
 		var imageFileUrl string
 		if book.Storage == model.STORAGE_R2 {
@@ -103,7 +111,7 @@ func GetBookDetail(ctx context.Context, params contract.GetBooks) (resp_contract
 			imageFileUrl = utils.GenRawFileUrl(config.Get().FileBucketPath, bookContent.ImageFilePath)
 		}
 
-		bookContentData := resp_contract.BookContent{
+		bookContentData := contract_resp.BookContent{
 			ID:           bookContent.ID,
 			BookID:       bookContent.BookID,
 			PageNumber:   bookContent.PageNumber,
@@ -128,8 +136,9 @@ func GetBookDetail(ctx context.Context, params contract.GetBooks) (resp_contract
 	} else {
 		coverFileUrl = utils.GenRawFileUrl(config.Get().FileBucketPath, book.CoverFilePath)
 	}
-	bookDetail := resp_contract.BookDetail{
+	bookDetail := contract_resp.BookDetail{
 		ID:           book.ID,
+		Slug:         book.Slug,
 		Title:        book.Title,
 		Description:  book.Description,
 		CoverFileUrl: coverFileUrl,
@@ -203,6 +212,31 @@ func DeleteBook(ctx context.Context, params contract.DeleteBook) error {
 
 		return nil
 	})
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	return nil
+}
+
+func UpdateBook(ctx context.Context, params contract.UpdateBook) error {
+	book, err := book_repo.GetByID(ctx, params.ID)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	book.Slug = params.Slug
+	book.Title = params.Title
+	book.Description = params.Description
+	book.Tags = params.Tags
+	book.Type = params.Type
+	book.Active = params.Active
+	book.OriginalPdfUrl = params.OriginalPdfUrl
+	book.AccessTags = params.AccessTags
+
+	err = book_repo.Update(ctx, nil, book)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return err

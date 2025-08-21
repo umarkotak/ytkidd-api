@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/contract"
 	"github.com/umarkotak/ytkidd-api/datastore"
 	"github.com/umarkotak/ytkidd-api/model"
-	"github.com/umarkotak/ytkidd-api/model/contract"
 )
 
 func GetByID(ctx context.Context, id int64) (model.YoutubeVideo, error) {

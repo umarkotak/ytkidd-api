@@ -11,9 +11,9 @@ import (
 	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/config"
+	"github.com/umarkotak/ytkidd-api/contract"
 	"github.com/umarkotak/ytkidd-api/datastore"
 	"github.com/umarkotak/ytkidd-api/model"
-	"github.com/umarkotak/ytkidd-api/model/contract"
 	"github.com/umarkotak/ytkidd-api/repos/book_content_repo"
 	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/repos/file_bucket_repo"
@@ -111,7 +111,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			Title:          params.Title,
 			Description:    params.Description,
 			CoverFileGuid:  "",
-			Tags:           pq.StringArray{},
+			Tags:           params.Tags,
 			Type:           bookType,
 			PdfFileGuid:    pdfFileGuid,
 			Active:         true,

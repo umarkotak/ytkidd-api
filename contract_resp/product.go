@@ -1,4 +1,4 @@
-package resp_contract
+package contract_resp
 
 import (
 	"github.com/umarkotak/ytkidd-api/model"

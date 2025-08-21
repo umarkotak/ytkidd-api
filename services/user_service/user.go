@@ -7,22 +7,22 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/contract"
+	"github.com/umarkotak/ytkidd-api/contract_resp"
 	"github.com/umarkotak/ytkidd-api/model"
-	"github.com/umarkotak/ytkidd-api/model/contract"
-	"github.com/umarkotak/ytkidd-api/model/resp_contract"
 	"github.com/umarkotak/ytkidd-api/repos/google_repo"
 	"github.com/umarkotak/ytkidd-api/repos/user_repo"
 	"github.com/umarkotak/ytkidd-api/utils/random"
 	"github.com/umarkotak/ytkidd-api/utils/user_auth"
 )
 
-func SignIn(ctx context.Context, params contract.UserSignIn) (resp_contract.UserSignIn, error) {
+func SignIn(ctx context.Context, params contract.UserSignIn) (contract_resp.UserSignIn, error) {
 	logrus.Infof("GOOGLE TOKEN: %+v\n", params.GoogleCredential)
 
 	googleUser, err := google_repo.ValidateGoogleJWT(params.GoogleCredential)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.UserSignIn{}, err
+		return contract_resp.UserSignIn{}, err
 	}
 
 	logrus.Infof("GOOGLE DATA: %+v\n", googleUser)
@@ -30,7 +30,7 @@ func SignIn(ctx context.Context, params contract.UserSignIn) (resp_contract.User
 	user, err := user_repo.GetByEmail(ctx, googleUser.Email)
 	if err != nil && err != sql.ErrNoRows {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.UserSignIn{}, err
+		return contract_resp.UserSignIn{}, err
 	}
 
 	if user.ID == 0 {
@@ -44,7 +44,7 @@ func SignIn(ctx context.Context, params contract.UserSignIn) (resp_contract.User
 		user.ID, user.Guid, err = user_repo.Insert(ctx, nil, user)
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
-			return resp_contract.UserSignIn{}, err
+			return contract_resp.UserSignIn{}, err
 		}
 	}
 
@@ -64,10 +64,10 @@ func SignIn(ctx context.Context, params contract.UserSignIn) (resp_contract.User
 	accessToken, err := user_auth.GenToken(ctx, authPayload)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.UserSignIn{}, err
+		return contract_resp.UserSignIn{}, err
 	}
 
-	return resp_contract.UserSignIn{
+	return contract_resp.UserSignIn{
 		AccessToken: accessToken,
 	}, nil
 }

@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"github.com/sirupsen/logrus"
-	"github.com/umarkotak/ytkidd-api/model/resp_contract"
+	"github.com/umarkotak/ytkidd-api/contract_resp"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_channel_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
 )
 
-func GetVideoDetail(ctx context.Context, youtubeVideoID int64) (resp_contract.YoutubeVideo, error) {
-	youtubeVideoDetail := resp_contract.YoutubeVideo{}
+func GetVideoDetail(ctx context.Context, youtubeVideoID int64) (contract_resp.YoutubeVideo, error) {
+	youtubeVideoDetail := contract_resp.YoutubeVideo{}
 
 	youtubeVideo, err := youtube_video_repo.GetByID(ctx, youtubeVideoID)
 	if err != nil {
@@ -24,13 +24,13 @@ func GetVideoDetail(ctx context.Context, youtubeVideoID int64) (resp_contract.Yo
 		return youtubeVideoDetail, err
 	}
 
-	youtubeVideoDetail = resp_contract.YoutubeVideo{
+	youtubeVideoDetail = contract_resp.YoutubeVideo{
 		ID:         youtubeVideo.ID,
 		ImageUrl:   youtubeVideo.ImageUrl,
 		Title:      youtubeVideo.Title,
 		Tags:       youtubeVideo.Tags,
 		ExternalID: youtubeVideo.ExternalId,
-		Channel: resp_contract.YoutubeChannel{
+		Channel: contract_resp.YoutubeChannel{
 			ID:       youtubeChannel.ID,
 			ImageUrl: youtubeChannel.ImageUrl,
 			Name:     youtubeChannel.Name,

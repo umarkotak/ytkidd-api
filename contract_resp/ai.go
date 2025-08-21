@@ -1,4 +1,4 @@
-package resp_contract
+package contract_resp
 
 type (
 	AiMessage struct {

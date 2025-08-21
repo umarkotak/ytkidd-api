@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"github.com/sirupsen/logrus"
-	"github.com/umarkotak/ytkidd-api/model/contract"
-	"github.com/umarkotak/ytkidd-api/model/resp_contract"
+	"github.com/umarkotak/ytkidd-api/contract"
+	"github.com/umarkotak/ytkidd-api/contract_resp"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
 )
 
-func GetVideos(ctx context.Context, params contract.GetYoutubeVideos) (resp_contract.YoutubeVideosHome, error) {
-	youtubeVideosHome := resp_contract.YoutubeVideosHome{}
+func GetVideos(ctx context.Context, params contract.GetYoutubeVideos) (contract_resp.YoutubeVideosHome, error) {
+	youtubeVideosHome := contract_resp.YoutubeVideosHome{}
 
 	youtubeVideosDetailed, err := youtube_video_repo.GetByParams(ctx, params)
 	if err != nil {
@@ -19,14 +19,14 @@ func GetVideos(ctx context.Context, params contract.GetYoutubeVideos) (resp_cont
 	}
 
 	excludeIDs := []int64{}
-	youtubeVideosHomeVideo := []resp_contract.YoutubeVideo{}
+	youtubeVideosHomeVideo := []contract_resp.YoutubeVideo{}
 	for _, videoDetailed := range youtubeVideosDetailed {
-		youtubeVideosHomeVideo = append(youtubeVideosHomeVideo, resp_contract.YoutubeVideo{
+		youtubeVideosHomeVideo = append(youtubeVideosHomeVideo, contract_resp.YoutubeVideo{
 			ID:       videoDetailed.ID,
 			ImageUrl: videoDetailed.ImageUrl,
 			Title:    videoDetailed.Title,
 			Tags:     videoDetailed.Tags,
-			Channel: resp_contract.YoutubeChannel{
+			Channel: contract_resp.YoutubeChannel{
 				ID:       videoDetailed.YoutubeChannelID,
 				ImageUrl: videoDetailed.YoutubeChannelImageUrl,
 				Name:     videoDetailed.YoutubeChannelName,
@@ -37,7 +37,7 @@ func GetVideos(ctx context.Context, params contract.GetYoutubeVideos) (resp_cont
 		excludeIDs = append(excludeIDs, videoDetailed.ID)
 	}
 
-	youtubeVideosHome = resp_contract.YoutubeVideosHome{
+	youtubeVideosHome = contract_resp.YoutubeVideosHome{
 		Videos:     youtubeVideosHomeVideo,
 		ExcludeIDs: excludeIDs,
 	}

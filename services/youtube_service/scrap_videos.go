@@ -7,8 +7,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/config"
+	"github.com/umarkotak/ytkidd-api/contract"
 	"github.com/umarkotak/ytkidd-api/model"
-	"github.com/umarkotak/ytkidd-api/model/contract"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_channel_repo"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
 	"google.golang.org/api/option"

@@ -5,26 +5,26 @@ import (
 	"database/sql"
 
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/contract"
+	"github.com/umarkotak/ytkidd-api/contract_resp"
 	"github.com/umarkotak/ytkidd-api/model"
-	"github.com/umarkotak/ytkidd-api/model/contract"
-	"github.com/umarkotak/ytkidd-api/model/resp_contract"
 	"github.com/umarkotak/ytkidd-api/repos/order_repo"
 	"github.com/umarkotak/ytkidd-api/repos/product_repo"
 	"github.com/umarkotak/ytkidd-api/repos/user_repo"
 	"github.com/umarkotak/ytkidd-api/utils/payment_lib"
 )
 
-func CreateOrder(ctx context.Context, params contract.CreateOrder) (resp_contract.CreateOrder, error) {
+func CreateOrder(ctx context.Context, params contract.CreateOrder) (contract_resp.CreateOrder, error) {
 	user, err := user_repo.GetByGuid(ctx, params.UserGuid)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.CreateOrder{}, err
+		return contract_resp.CreateOrder{}, err
 	}
 
 	product, err := product_repo.GetByCode(ctx, params.ProductCode)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.CreateOrder{}, err
+		return contract_resp.CreateOrder{}, err
 	}
 
 	order := model.Order{
@@ -62,7 +62,7 @@ func CreateOrder(ctx context.Context, params contract.CreateOrder) (resp_contrac
 	})
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.CreateOrder{}, err
+		return contract_resp.CreateOrder{}, err
 	}
 
 	order.PaymentNumber = sql.NullString{createPaymentData.Number, true}
@@ -70,10 +70,10 @@ func CreateOrder(ctx context.Context, params contract.CreateOrder) (resp_contrac
 	order.ID, err = order_repo.Insert(ctx, nil, order)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.CreateOrder{}, err
+		return contract_resp.CreateOrder{}, err
 	}
 
-	return resp_contract.CreateOrder{
+	return contract_resp.CreateOrder{
 		OrderNumber:                order.Number,
 		MidtransSnapToken:          createPaymentData.MidtransSnapToken,
 		MidtransSnapUrl:            createPaymentData.MidtransSnapUrl,
@@ -82,24 +82,24 @@ func CreateOrder(ctx context.Context, params contract.CreateOrder) (resp_contrac
 	}, nil
 }
 
-func GetOrderDetail(ctx context.Context, userGuid, orderNumber string) (resp_contract.OrderDetail, error) {
+func GetOrderDetail(ctx context.Context, userGuid, orderNumber string) (contract_resp.OrderDetail, error) {
 	user, err := user_repo.GetByGuid(ctx, userGuid)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.OrderDetail{}, err
+		return contract_resp.OrderDetail{}, err
 	}
 
 	order, err := order_repo.GetByNumber(ctx, orderNumber)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.OrderDetail{}, err
+		return contract_resp.OrderDetail{}, err
 	}
 
 	if order.UserID != user.ID {
-		return resp_contract.OrderDetail{}, model.ErrForbidden
+		return contract_resp.OrderDetail{}, model.ErrForbidden
 	}
 
-	return resp_contract.OrderDetail{
+	return contract_resp.OrderDetail{
 		CreatedAt:      order.CreatedAt,
 		UpdatedAt:      order.UpdatedAt,
 		UserID:         order.UserID,
@@ -117,40 +117,40 @@ func GetOrderDetail(ctx context.Context, userGuid, orderNumber string) (resp_con
 	}, nil
 }
 
-func CheckOrderPayment(ctx context.Context, userGuid, orderNumber string) (resp_contract.CheckOrderPayment, error) {
+func CheckOrderPayment(ctx context.Context, userGuid, orderNumber string) (contract_resp.CheckOrderPayment, error) {
 	user, err := user_repo.GetByGuid(ctx, userGuid)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.CheckOrderPayment{}, err
+		return contract_resp.CheckOrderPayment{}, err
 	}
 
 	order, err := order_repo.GetByNumber(ctx, orderNumber)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.CheckOrderPayment{}, err
+		return contract_resp.CheckOrderPayment{}, err
 	}
 
 	if order.UserID != user.ID {
-		return resp_contract.CheckOrderPayment{}, model.ErrForbidden
+		return contract_resp.CheckOrderPayment{}, model.ErrForbidden
 	}
 
-	return resp_contract.CheckOrderPayment{
+	return contract_resp.CheckOrderPayment{
 		OrderNumber:   order.Number,
 		Status:        order.Status,
 		PaymentStatus: order.PaymentStatus,
 	}, nil
 }
 
-func GetOrderList(ctx context.Context, params contract.GetOrderByParams) (resp_contract.OrderList, error) {
+func GetOrderList(ctx context.Context, params contract.GetOrderByParams) (contract_resp.OrderList, error) {
 	orders, err := order_repo.GetByParams(ctx, params)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return resp_contract.OrderList{}, err
+		return contract_resp.OrderList{}, err
 	}
 
-	ordersListData := make([]resp_contract.OrderListData, 0, len(orders))
+	ordersListData := make([]contract_resp.OrderListData, 0, len(orders))
 	for _, order := range orders {
-		ordersListData = append(ordersListData, resp_contract.OrderListData{
+		ordersListData = append(ordersListData, contract_resp.OrderListData{
 			CreatedAt:      order.CreatedAt,
 			UpdatedAt:      order.UpdatedAt,
 			UserID:         order.UserID,
@@ -168,7 +168,7 @@ func GetOrderList(ctx context.Context, params contract.GetOrderByParams) (resp_c
 		})
 	}
 
-	return resp_contract.OrderList{
+	return contract_resp.OrderList{
 		Orders: ordersListData,
 	}, nil
 }

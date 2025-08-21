@@ -39,6 +39,17 @@ var (
 			AND b.deleted_at IS NULL
 	`, allColumns)
 
+	queryGetBySlug = fmt.Sprintf(`
+		SELECT
+			%s,
+			COALESCE(fb.exact_path, '') AS cover_file_path
+		FROM books b
+		LEFT JOIN file_bucket fb ON fb.guid = b.cover_file_guid
+		WHERE
+			b.slug = :slug
+			AND b.deleted_at IS NULL
+	`, allColumns)
+
 	queryGetByParams = fmt.Sprintf(`
 		SELECT
 			%s,
@@ -129,6 +140,7 @@ var (
 
 var (
 	stmtGetByID     *sqlx.NamedStmt
+	stmtGetBySlug   *sqlx.NamedStmt
 	stmtGetByParams *sqlx.NamedStmt
 	stmtInsert      *sqlx.NamedStmt
 	stmtUpdate      *sqlx.NamedStmt
@@ -141,6 +153,10 @@ func Initialize() {
 	var err error
 
 	stmtGetByID, err = datastore.Get().Db.PrepareNamed(queryGetByID)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	stmtGetBySlug, err = datastore.Get().Db.PrepareNamed(queryGetBySlug)
 	if err != nil {
 		logrus.Fatal(err)
 	}

@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/contract"
 	"github.com/umarkotak/ytkidd-api/model"
-	"github.com/umarkotak/ytkidd-api/model/contract"
 	"github.com/umarkotak/ytkidd-api/services/book_service"
 	"github.com/umarkotak/ytkidd-api/utils"
 	"github.com/umarkotak/ytkidd-api/utils/common_ctx"
@@ -48,7 +48,7 @@ func GetBookDetail(w http.ResponseWriter, r *http.Request) {
 
 	params := contract.GetBooks{
 		UserGuid: commonCtx.UserAuth.GUID,
-		BookID:   utils.StringMustInt64(chi.URLParam(r, "id")),
+		Slug:     chi.URLParam(r, "slug"),
 	}
 
 	bookDetail, err := book_service.GetBookDetail(ctx, params)
@@ -69,6 +69,30 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := book_service.DeleteBook(ctx, params)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	render.Response(w, r, 200, nil)
+}
+
+func UpdateBook(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	params := contract.UpdateBook{
+		ID: utils.StringMustInt64(chi.URLParam(r, "id")),
+	}
+
+	err := utils.BindJson(r, &params)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	err = book_service.UpdateBook(ctx, params)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		render.Error(w, r, err, "")

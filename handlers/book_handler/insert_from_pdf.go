@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/contract"
 	"github.com/umarkotak/ytkidd-api/model"
-	"github.com/umarkotak/ytkidd-api/model/contract"
 	"github.com/umarkotak/ytkidd-api/services/book_service"
 	"github.com/umarkotak/ytkidd-api/utils"
 	"github.com/umarkotak/ytkidd-api/utils/render"
@@ -79,6 +79,7 @@ func InsertFromPdf(w http.ResponseWriter, r *http.Request) {
 		BookType:    r.FormValue("book_type"),
 		Storage:     r.FormValue("storage"),
 		StorePdf:    r.FormValue("store_pdf") == "true",
+		Tags:        utils.SplitString(r.FormValue("tags"), ","),
 	}
 
 	err = book_service.InsertFromPdf(ctx, params)
@@ -145,6 +146,7 @@ func InsertFromPdfUrls(w http.ResponseWriter, r *http.Request) {
 			OriginalPdfUrl: oneParams.PdfUrl,
 			Storage:        oneParams.Storage,
 			StorePdf:       oneParams.StorePdf,
+			Tags:           oneParams.Tags,
 		}
 		err = book_service.InsertFromPdf(ctx, insertFromPdfParams)
 		if err != nil {
