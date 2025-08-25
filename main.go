@@ -81,6 +81,7 @@ func main() {
 		fmt.Println("Usage: go run .")
 		fmt.Println("       go run . migrate up")
 		fmt.Println("       go run . gen_base_key")
+		fmt.Println("       go run . scrap_kemendikbud")
 	}
 }
 
