@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	ACCESS_TAG_FREE  = "free"
-	ACCESS_TAG_BASIC = "basic"
+	ACCESS_TAG_FREE    = "free"
+	ACCESS_TAG_PREMIUM = "premium"
 )
 
 type (

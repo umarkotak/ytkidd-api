@@ -68,10 +68,23 @@ func GetBooks(ctx context.Context, params contract.GetBooks) (contract_resp.GetB
 }
 
 func GetBookDetail(ctx context.Context, params contract.GetBooks) (contract_resp.BookDetail, error) {
-	book, err := book_repo.GetBySlug(ctx, params.Slug)
-	if err != nil {
-		logrus.WithContext(ctx).Error(err)
-		return contract_resp.BookDetail{}, err
+	var err error
+
+	isSlug := utils.StringMustInt64(params.Slug) == 0
+
+	var book model.Book
+	if isSlug {
+		book, err = book_repo.GetBySlug(ctx, params.Slug)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return contract_resp.BookDetail{}, err
+		}
+	} else {
+		book, err = book_repo.GetByID(ctx, utils.StringMustInt64(params.Slug))
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return contract_resp.BookDetail{}, err
+		}
 	}
 
 	if !book.IsFree() {
@@ -144,6 +157,7 @@ func GetBookDetail(ctx context.Context, params contract.GetBooks) (contract_resp
 		CoverFileUrl: coverFileUrl,
 		Tags:         book.Tags,
 		Type:         book.Type,
+		AccessTags:   book.AccessTags,
 		Contents:     bookContentDatas,
 		PdfUrl:       pdfUrl,
 	}

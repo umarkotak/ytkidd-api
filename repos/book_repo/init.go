@@ -63,6 +63,9 @@ var (
 			AND (:types = '{}' OR b.type = ANY(:types))
 			AND b.active
 			AND b.deleted_at IS NULL
+			AND (:exclude_ids = '{}' OR NOT(b.id = ANY(:exclude_ids)))
+			AND (:access = '{}' OR b.access_tags && :access)
+			AND (:exclude_access = '{}' OR NOT(b.access_tags && :exclude_access))
 		ORDER BY
 			CASE WHEN :sort = 'title_asc' THEN b.title END ASC,
 			CASE WHEN :sort = 'title_desc' THEN b.title END DESC,

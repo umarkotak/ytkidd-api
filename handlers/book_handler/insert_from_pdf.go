@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/contract"
 	"github.com/umarkotak/ytkidd-api/model"
+	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/services/book_service"
 	"github.com/umarkotak/ytkidd-api/utils"
 	"github.com/umarkotak/ytkidd-api/utils/render"
@@ -106,6 +107,11 @@ func InsertFromPdfUrls(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, oneParams := range params.Books {
+		book, _ := book_repo.GetBySlug(ctx, oneParams.Slug)
+		if book.ID > 0 {
+			continue
+		}
+
 		if oneParams.PdfUrl == "" {
 			continue
 		}

@@ -9,12 +9,13 @@ type (
 	CommonCtxKeyType string
 
 	UserAuth struct {
-		GUID     string `json:"guid"`
-		Name     string `json:"name"`
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		PhotoUrl string `json:"photo_url"`
-		UserRole string `json:"user_role"`
+		GUID       string `json:"guid"`
+		Name       string `json:"name"`
+		Username   string `json:"username"`
+		Email      string `json:"email"`
+		PhotoUrl   string `json:"photo_url"`
+		UserRole   string `json:"user_role"`
+		Subscribed bool   `json:"subscribed"`
 	}
 
 	CommonCtx struct {

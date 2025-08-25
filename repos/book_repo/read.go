@@ -44,6 +44,12 @@ func GetByParams(ctx context.Context, params contract.GetBooks) ([]model.Book, e
 	if params.Types == nil {
 		params.Types = []string{}
 	}
+	if params.Access == nil {
+		params.Access = []string{}
+	}
+	if params.ExcludeAccess == nil {
+		params.ExcludeAccess = []string{}
+	}
 
 	objs := []model.Book{}
 	err := stmtGetByParams.SelectContext(ctx, &objs, params)

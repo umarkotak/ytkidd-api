@@ -69,6 +69,28 @@ var (
 		LIMIT :limit OFFSET :offset
 	`, allColumns)
 
+	queryGetByParamsWithPayment = fmt.Sprintf(`
+		SELECT
+			%s,
+			p.expired_at AS payment_expired_at,
+			p.success_at AS payment_success_at,
+			p.payment_platform AS payment_payment_platform,
+			p.payment_type AS payment_payment_type,
+			p.reference_status AS payment_reference_status,
+			p.reference_number AS payment_reference_number,
+			p.fraud_status AS payment_fraud_status,
+			p.masked_card AS payment_masked_card,
+			p.amount AS payment_amount,
+			p.metadata AS payment_metadata
+		FROM orders o
+		INNER JOIN payments p ON o.payment_number = p.number
+		WHERE
+			(:user_id = 0 OR o.user_id = :user_id)
+			AND o.deleted_at IS NULL
+		ORDER BY o.id DESC
+		LIMIT :limit OFFSET :offset
+	`, allColumns)
+
 	queryInsert = `
 		INSERT INTO orders (
 			user_id,
@@ -120,12 +142,13 @@ var (
 )
 
 var (
-	stmtGetByID     *sqlx.NamedStmt
-	stmtGetByNumber *sqlx.NamedStmt
-	stmtInsert      *sqlx.NamedStmt
-	stmtUpdate      *sqlx.NamedStmt
-	stmtGetByUserID *sqlx.NamedStmt
-	stmtGetByParams *sqlx.NamedStmt
+	stmtGetByID                *sqlx.NamedStmt
+	stmtGetByNumber            *sqlx.NamedStmt
+	stmtInsert                 *sqlx.NamedStmt
+	stmtUpdate                 *sqlx.NamedStmt
+	stmtGetByUserID            *sqlx.NamedStmt
+	stmtGetByParams            *sqlx.NamedStmt
+	stmtGetByParamsWithPayment *sqlx.NamedStmt
 )
 
 func Initialize() {
@@ -152,6 +175,10 @@ func Initialize() {
 		logrus.Fatal(err)
 	}
 	stmtGetByParams, err = datastore.Get().Db.PrepareNamed(queryGetByParams)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	stmtGetByParamsWithPayment, err = datastore.Get().Db.PrepareNamed(queryGetByParamsWithPayment)
 	if err != nil {
 		logrus.Fatal(err)
 	}

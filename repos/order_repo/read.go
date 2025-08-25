@@ -51,3 +51,13 @@ func GetByParams(ctx context.Context, params contract.GetOrderByParams) ([]model
 	}
 	return objs, nil
 }
+
+func GetByParamsWithPayment(ctx context.Context, params contract.GetOrderByParams) ([]model.OrderWithPayment, error) {
+	objs := []model.OrderWithPayment{}
+	err := stmtGetByParamsWithPayment.SelectContext(ctx, &objs, params)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return objs, err
+	}
+	return objs, nil
+}

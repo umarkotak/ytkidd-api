@@ -116,7 +116,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			PdfFileGuid:    pdfFileGuid,
 			Active:         true,
 			OriginalPdfUrl: params.OriginalPdfUrl,
-			AccessTags:     pq.StringArray{model.ACCESS_TAG_FREE, model.ACCESS_TAG_BASIC},
+			AccessTags:     pq.StringArray{model.ACCESS_TAG_FREE, model.ACCESS_TAG_PREMIUM},
 			Storage:        params.Storage,
 		}
 		book.ID, err = book_repo.Insert(ctx, tx, book)

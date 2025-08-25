@@ -17,12 +17,15 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	params := contract.GetBooks{
-		Title: r.URL.Query().Get("title"),
-		Tags:  utils.StringMustSliceString(r.URL.Query().Get("tags"), ","),
-		Types: utils.StringMustSliceString(r.URL.Query().Get("types"), ","),
-		Sort:  r.URL.Query().Get("sort"),
+		Title:         r.URL.Query().Get("title"),
+		Tags:          utils.StringMustSliceString(r.URL.Query().Get("tags"), ","),
+		Types:         utils.StringMustSliceString(r.URL.Query().Get("types"), ","),
+		Access:        utils.StringMustSliceString(r.URL.Query().Get("access"), ","),
+		ExcludeAccess: utils.StringMustSliceString(r.URL.Query().Get("exclude_access"), ","),
+		Sort:          r.URL.Query().Get("sort"),
+		ExcludeIDs:    utils.StringMustSliceInt64(r.URL.Query().Get("exclude_ids"), ","),
 		Pagination: model.Pagination{
-			Limit: utils.StringMustInt64(r.URL.Query().Get("types")),
+			Limit: utils.StringMustInt64(r.URL.Query().Get("limit")),
 			Page:  utils.StringMustInt64(r.URL.Query().Get("page")),
 		},
 	}

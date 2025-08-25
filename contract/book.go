@@ -32,12 +32,15 @@ type (
 	}
 
 	GetBooks struct {
-		UserGuid string         `db:"-"`
-		Slug     string         `db:"-"`
-		Title    string         `db:"title"`
-		Tags     pq.StringArray `db:"tags"`
-		Types    pq.StringArray `db:"types"`
-		Sort     string         `db:"sort"`
+		UserGuid      string         `db:"-"`
+		Slug          string         `db:"-"`
+		Title         string         `db:"title"`
+		Tags          pq.StringArray `db:"tags"`
+		Types         pq.StringArray `db:"types"`
+		Access        pq.StringArray `db:"access"`
+		ExcludeAccess pq.StringArray `db:"exclude_access"`
+		Sort          string         `db:"sort"`
+		ExcludeIDs    pq.Int64Array  `db:"exclude_ids"`
 		model.Pagination
 	}
 

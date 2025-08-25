@@ -17,6 +17,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/handlers/ai_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/book_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/comfy_ui_handler"
+	"github.com/umarkotak/ytkidd-api/handlers/kemendikbud_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/order_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/ping_handler"
 	"github.com/umarkotak/ytkidd-api/handlers/product_handler"
@@ -53,6 +54,7 @@ func main() {
 
 	config.Initialize()
 	datastore.Initialize()
+	initializeDependencies()
 
 	args := os.Args[1:]
 
@@ -63,6 +65,8 @@ func main() {
 		switch args[0] {
 		case "gen_base_key":
 			user_auth.GenBaseKey()
+		case "scrap_kemendikbud":
+			kemendikbud_handler.Scrap()
 		}
 
 	} else if len(args) == 2 && args[0] == "migrate" {
@@ -82,8 +86,6 @@ func main() {
 
 func runServer() {
 	logrus.Infof("starting ytkidd backend")
-
-	initializeDependencies()
 
 	cron.Start()
 
