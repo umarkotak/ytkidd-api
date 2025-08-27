@@ -79,6 +79,10 @@ func GetPresignedUrl(ctx context.Context, objectKey string, expiry time.Duration
 	return req.URL, nil
 }
 
+func GetObjectUrl(ctx context.Context, objectKey string) (string, error) {
+	return dataStore.R2PublicDomain + "/" + objectKey, nil
+}
+
 func DeleteByKeys(ctx context.Context, keys []string) error {
 	// Build a batch of keys to delete
 	objects := make([]types.ObjectIdentifier, 0, len(keys))

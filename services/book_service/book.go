@@ -3,7 +3,6 @@ package book_service
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
@@ -31,7 +30,7 @@ func GetBooks(ctx context.Context, params contract.GetBooks) (contract_resp.GetB
 	for _, book := range books {
 		var coverFileUrl string
 		if book.Storage == model.STORAGE_R2 {
-			coverFileUrl, _ = datastore.GetPresignedUrl(ctx, book.CoverFilePath, 1*time.Minute)
+			coverFileUrl, _ = datastore.GetObjectUrl(ctx, book.CoverFilePath)
 		} else {
 			coverFileUrl = utils.GenRawFileUrl(config.Get().FileBucketPath, book.CoverFilePath)
 		}
@@ -119,7 +118,7 @@ func GetBookDetail(ctx context.Context, params contract.GetBooks) (contract_resp
 	for _, bookContent := range bookContents {
 		var imageFileUrl string
 		if book.Storage == model.STORAGE_R2 {
-			imageFileUrl, _ = datastore.GetPresignedUrl(ctx, bookContent.ImageFilePath, 1*time.Minute)
+			imageFileUrl, _ = datastore.GetObjectUrl(ctx, bookContent.ImageFilePath)
 		} else {
 			imageFileUrl = utils.GenRawFileUrl(config.Get().FileBucketPath, bookContent.ImageFilePath)
 		}
@@ -138,14 +137,14 @@ func GetBookDetail(ctx context.Context, params contract.GetBooks) (contract_resp
 	var pdfUrl string
 	// TODO: implement logic
 	// if book.Storage == model.STORAGE_R2 {
-	// 	pdfUrl, _ = datastore.GetPresignedUrl(ctx, book.PdfFileGuid, 1*time.Minute)
+	// 	pdfUrl, _ = datastore.GetObjectUrl(ctx, book.PdfFileGuid)
 	// } else {
 	// 	pdfUrl = utils.GenRawFileUrl(config.Get().FileBucketPath, book.PdfFileGuid)
 	// }
 
 	var coverFileUrl string
 	if book.Storage == model.STORAGE_R2 {
-		coverFileUrl, _ = datastore.GetPresignedUrl(ctx, book.CoverFilePath, 1*time.Minute)
+		coverFileUrl, _ = datastore.GetObjectUrl(ctx, book.CoverFilePath)
 	} else {
 		coverFileUrl = utils.GenRawFileUrl(config.Get().FileBucketPath, book.CoverFilePath)
 	}

@@ -22,6 +22,7 @@ type DataStore struct {
 	R2Client        *s3.Client        //
 	R2Manager       *manager.Uploader //
 	R2PresignClient *s3.PresignClient //
+	R2PublicDomain  string            //
 }
 
 var dataStore DataStore
@@ -68,6 +69,7 @@ func Initialize() error {
 		R2Client:        r2Client,
 		R2Manager:       manager.NewUploader(r2Client),
 		R2PresignClient: s3.NewPresignClient(r2Client),
+		R2PublicDomain:  config.Get().R2PublicDomain,
 	}
 
 	return nil

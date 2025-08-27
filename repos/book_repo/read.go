@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/contract"
 	"github.com/umarkotak/ytkidd-api/model"
+	"github.com/umarkotak/ytkidd-api/utils"
 )
 
 func GetByID(ctx context.Context, id int64) (model.Book, error) {
@@ -26,6 +27,33 @@ func GetBySlug(ctx context.Context, slug string) (model.Book, error) {
 	obj := model.Book{}
 	err := stmtGetBySlug.GetContext(ctx, &obj, map[string]any{
 		"slug": slug,
+	})
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return obj, err
+	}
+	return obj, nil
+}
+
+func GetByIDOrSlug(ctx context.Context, identifier string) (model.Book, error) {
+	var err error
+
+	obj := model.Book{}
+
+	id := utils.StringMustInt64(identifier)
+	if id != 0 {
+		err = stmtGetByID.GetContext(ctx, &obj, map[string]any{
+			"id": id,
+		})
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return obj, err
+		}
+		return obj, nil
+	}
+
+	err = stmtGetBySlug.GetContext(ctx, &obj, map[string]any{
+		"slug": identifier,
 	})
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)

@@ -37,5 +37,6 @@ type (
 		R2AccessKeySecret string
 		R2StorageEndpoint string
 		R2BucketName      string
+		R2PublicDomain    string
 	}
 )
