@@ -2,10 +2,12 @@ package youtube_video_service
 
 import (
 	"context"
+	"slices"
 
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/contract"
 	"github.com/umarkotak/ytkidd-api/contract_resp"
+	"github.com/umarkotak/ytkidd-api/model"
 	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
 )
 
@@ -22,10 +24,11 @@ func GetVideos(ctx context.Context, params contract.GetYoutubeVideos) (contract_
 	youtubeVideosHomeVideo := []contract_resp.YoutubeVideo{}
 	for _, videoDetailed := range youtubeVideosDetailed {
 		youtubeVideosHomeVideo = append(youtubeVideosHomeVideo, contract_resp.YoutubeVideo{
-			ID:       videoDetailed.ID,
-			ImageUrl: videoDetailed.ImageUrl,
-			Title:    videoDetailed.Title,
-			Tags:     videoDetailed.Tags,
+			ID:        videoDetailed.ID,
+			ImageUrl:  videoDetailed.ImageUrl,
+			Title:     videoDetailed.Title,
+			Tags:      videoDetailed.Tags,
+			CanAction: slices.Contains(model.ADMIN_ROLES, params.UserRole),
 			Channel: contract_resp.YoutubeChannel{
 				ID:       videoDetailed.YoutubeChannelID,
 				ImageUrl: videoDetailed.YoutubeChannelImageUrl,

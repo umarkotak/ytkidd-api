@@ -19,6 +19,7 @@ const (
 
 var (
 	VALID_GENDERS = []string{GENDER_MALE, GENDER_FEMALE}
+	ADMIN_ROLES   = []string{USER_ROLE_SUPERADMIN, USER_ROLE_ADMIN}
 )
 
 type (

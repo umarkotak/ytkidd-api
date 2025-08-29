@@ -13,5 +13,6 @@ type (
 		Channel    YoutubeChannel `json:"channel"`
 		Tags       []string       `json:"tags"`
 		ExternalID string         `json:"external_id,omitempty"`
+		CanAction  bool           `json:"can_action"`
 	}
 )

@@ -13,6 +13,8 @@ type (
 	}
 
 	GetYoutubeVideos struct {
+		UserGuid          string         `db:"-"`
+		UserRole          string         `db:"-"`
 		Tags              pq.StringArray `db:"tags"`
 		ChannelIDs        pq.Int64Array  `db:"channel_ids"`
 		ExcludeIDs        pq.Int64Array  `db:"exclude_ids"`
