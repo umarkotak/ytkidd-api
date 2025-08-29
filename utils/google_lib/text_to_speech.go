@@ -1,4 +1,4 @@
-package main
+package google_lib
 
 import (
 	"context"
@@ -89,17 +89,3 @@ func TextToSpeech(text, filePath string) error {
 	fmt.Printf("Successfully generated speech and saved to %s\n", filePath)
 	return nil
 }
-
-// main function to demonstrate the TextToSpeech function.
-// func main() {
-// 	// Define the text you want to convert and the output file name.
-// 	textToConvert := "Nabi Adam adalah manusia pertama yang diciptakan oleh Allah dari tanah liat. Allah membentuk tubuhnya dengan sempurna, lalu meniupkan ruh ke dalamnya sehingga ia hidup. Allah mengajarkan kepada Adam nama-nama segala sesuatu, menjadikannya khalifah di bumi, dan memberinya pasangan bernama Hawa. Mereka berdua tinggal di surga, hidup dengan segala kenikmatan, dan diperbolehkan memakan apa saja kecuali buah dari satu pohon yang terlarang. Namun, iblis menggoda keduanya hingga mereka memakan buah tersebut."
-// 	outputFilePath := "output.mp3"
-
-// 	// Call the function.
-// 	err := TextToSpeech(textToConvert, outputFilePath)
-// 	if err != nil {
-// 		// If an error occurs, log it and exit.
-// 		log.Fatalf("An error occurred: %v", err)
-// 	}
-// }

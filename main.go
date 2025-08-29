@@ -189,12 +189,12 @@ func initializeHttpServer() {
 
 		ri.Get("/ping", ping_handler.Ping)
 
-		ri.Get("/youtube_videos", youtube_video_handler.GetYoutubeVideos)
-		ri.Get("/youtube_video/{id}", youtube_video_handler.GetYoutubeVideoDetail)
+		rOptionalUserAuth.Get("/youtube_videos", youtube_video_handler.GetYoutubeVideos)
+		rOptionalUserAuth.Get("/youtube_video/{id}", youtube_video_handler.GetYoutubeVideoDetail)
 		ri.Get("/youtube_channels", youtube_channel_handler.GetYoutubeChannels)
 		ri.Get("/youtube_channel/{id}", youtube_channel_handler.GetYoutubeChannelDetail)
-		rUserAuth.Get("/youtube_channel/{id}/detailed", youtube_channel_handler.GetYoutubeChannelDetailed)
-		rUserAuth.Patch("/youtube_channel/{id}", youtube_channel_handler.UpdateYoutubeChannel)
+		rAdminAuth.Get("/youtube_channel/{id}/detailed", youtube_channel_handler.GetYoutubeChannelDetailed)
+		rAdminAuth.Patch("/youtube_channel/{id}", youtube_channel_handler.UpdateYoutubeChannel)
 
 		ri.Post("/youtube/scrap_videos", youtube_handler.ScrapVideos)
 
