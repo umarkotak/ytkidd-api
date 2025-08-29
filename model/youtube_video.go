@@ -19,6 +19,7 @@ type (
 		ImageUrl         string         `db:"image_url"`
 		Tags             pq.StringArray `db:"tags"`
 		Active           bool           `db:"active"`
+		PublishedAt      time.Time      `db:"published_at"`
 	}
 
 	YoutubeVideoDetailed struct {

@@ -89,6 +89,6 @@ func SetCorsHeaders(w http.ResponseWriter) {
 	w.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PATCH, PUT, DELETE")
 	w.Header().Add(
 		"Access-Control-Allow-Headers",
-		"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Animapu-User-Uid, X-Visitor-Id, X-From-Path",
+		"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, X-App-Session",
 	)
 }

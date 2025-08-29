@@ -2,11 +2,9 @@ package youtube_video_repo
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/contract"
-	"github.com/umarkotak/ytkidd-api/datastore"
 	"github.com/umarkotak/ytkidd-api/model"
 )
 
@@ -61,23 +59,7 @@ func GetByParams(ctx context.Context, params contract.GetYoutubeVideos) ([]model
 		params.ExcludeChannelIDs = []int64{}
 	}
 
-	switch params.Sort {
-	case "":
-		params.Sort = "RANDOM()"
-	case "id_desc":
-		params.Sort = "ytvid.id DESC"
-	default:
-		params.Sort = "RANDOM()"
-	}
-
-	query := fmt.Sprintf(queryGetByParams, params.Sort)
-	stmtGetByParams, err := datastore.Get().Db.PrepareNamed(query)
-	if err != nil {
-		logrus.WithContext(ctx).Error(err)
-		return objs, err
-	}
-
-	err = stmtGetByParams.SelectContext(ctx, &objs, params)
+	err := stmtGetByParams.SelectContext(ctx, &objs, params)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return objs, err

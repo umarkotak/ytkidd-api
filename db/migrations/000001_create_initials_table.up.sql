@@ -50,6 +50,8 @@ CREATE TABLE IF NOT EXISTS youtube_videos (
   CONSTRAINT fk_youtube_channel_id FOREIGN KEY (youtube_channel_id) REFERENCES youtube_channels(id)
 );
 ALTER SEQUENCE users_id_seq RESTART WITH 1;
+ALTER TABLE youtube_videos
+  ADD published_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 CREATE TABLE IF NOT EXISTS worksheets (
   id SERIAL PRIMARY KEY,
@@ -215,3 +217,44 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
   CONSTRAINT fk_order_id FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 ALTER SEQUENCE user_subscriptions_id_seq RESTART WITH 1;
+
+CREATE TABLE IF NOT EXISTS user_strokes (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP WITH TIME ZONE,
+
+  book_id BIGINT NULL,
+  user_id BIGINT NULL,
+  app_session TEXT NULL,
+
+  image_url TEXT NOT NULL,
+  tool TEXT NOT NULL,
+  color TEXT NOT NULL,
+  relative_size FLOAT NOT NULL,
+  opacity FLOAT NOT NULL,
+  points JSONB NOT NULL DEFAULT '[]',
+
+  CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id),
+  CONSTRAINT fk_book_id FOREIGN KEY (book_id) REFERENCES books(id)
+);
+ALTER SEQUENCE user_strokes_id_seq RESTART WITH 1;
+
+CREATE TABLE IF NOT EXISTS user_activities (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP WITH TIME ZONE,
+
+  user_id BIGINT NULL,
+  app_session TEXT NULL,
+  youtube_video_id BIGINT NULL,
+  book_id BIGINT NULL,
+  book_content_id BIGINT NULL,
+
+  CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id),
+  CONSTRAINT fk_youtube_video_id FOREIGN KEY (youtube_video_id) REFERENCES youtube_videos(id),
+  CONSTRAINT fk_book_id FOREIGN KEY (book_id) REFERENCES books(id),
+  CONSTRAINT fk_book_content_id FOREIGN KEY (book_content_id) REFERENCES book_contents(id)
+);
+ALTER SEQUENCE user_activities_id_seq RESTART WITH 1;

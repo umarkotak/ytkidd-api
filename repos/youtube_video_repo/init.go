@@ -21,6 +21,7 @@ var (
 		"ytvid.image_url",
 		"ytvid.tags",
 		"ytvid.active",
+		"ytvid.published_at",
 	}, ", ")
 
 	queryGetByID = fmt.Sprintf(`
@@ -80,7 +81,12 @@ var (
 			AND (:exclude_ids = '{}' OR ytvid.id != ANY(:exclude_ids))
 			AND (:exclude_channel_ids = '{}' OR NOT(ytch.id = ANY(:exclude_channel_ids)))
 			AND (:channel_ids = '{}' OR ytch.id = ANY(:channel_ids))
-		ORDER BY %s
+		ORDER BY
+			CASE WHEN :sort = 'title_asc' THEN ytvid.title END ASC,
+			CASE WHEN :sort = 'title_desc' THEN ytvid.title END DESC,
+			CASE WHEN :sort = 'id_asc' THEN ytvid.id END ASC,
+			CASE WHEN :sort = 'id_desc' THEN ytvid.id END DESC,
+			CASE WHEN :sort = 'random' THEN RANDOM() END
 		LIMIT :limit OFFSET :offset
 	`
 
@@ -91,14 +97,16 @@ var (
 			title,
 			image_url,
 			tags,
-			active
+			active,
+			published_at
 		) VALUES (
 			:youtube_channel_id,
 			:external_id,
 			:title,
 			:image_url,
 			:tags,
-			:active
+			:active,
+			:published_at
 		) RETURNING id
 	`
 
@@ -126,6 +134,7 @@ var (
 	stmtGetByID         *sqlx.NamedStmt
 	stmtGetByExternalID *sqlx.NamedStmt
 	stmtGetForSearch    *sqlx.NamedStmt
+	stmtGetByParams     *sqlx.NamedStmt
 	stmtInsert          *sqlx.NamedStmt
 	stmtUpdate          *sqlx.NamedStmt
 	stmtSoftDelete      *sqlx.NamedStmt
@@ -143,6 +152,10 @@ func Initialize() {
 		logrus.Fatal(err)
 	}
 	stmtGetForSearch, err = datastore.Get().Db.PrepareNamed(queryGetForSearch)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	stmtGetByParams, err = datastore.Get().Db.PrepareNamed(queryGetByParams)
 	if err != nil {
 		logrus.Fatal(err)
 	}

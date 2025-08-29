@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"html"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/config"
@@ -80,6 +81,13 @@ func ScrapVideos(ctx context.Context, params contract.ScrapVideos) (string, bool
 			continue
 		}
 
+		publishedAt, err := time.Parse(time.RFC3339, item.Snippet.PublishedAt)
+		if err != nil {
+			logrus.WithContext(ctx).WithFields(logrus.Fields{
+				"published_at": item.Snippet.PublishedAt,
+			}).Error(err)
+			publishedAt = time.Now()
+		}
 		youtubeVideo = model.YoutubeVideo{
 			YoutubeChannelID: youtubeChannel.ID,
 			ExternalId:       item.Id.VideoId,
@@ -87,6 +95,7 @@ func ScrapVideos(ctx context.Context, params contract.ScrapVideos) (string, bool
 			ImageUrl:         item.Snippet.Thumbnails.Medium.Url,
 			Tags:             []string{},
 			Active:           true,
+			PublishedAt:      publishedAt,
 		}
 		youtubeVideo.ID, err = youtube_video_repo.Insert(ctx, nil, youtubeVideo)
 		if err != nil {
