@@ -31,6 +31,15 @@ var (
 			AND bc.deleted_at IS NULL
 	`, allColumns)
 
+	queryGetByIDs = fmt.Sprintf(`
+		SELECT
+			%s
+		FROM book_contents bc
+		WHERE
+			bc.id = ANY(:ids)
+			AND bc.deleted_at IS NULL
+	`, allColumns)
+
 	queryGetByBookID = fmt.Sprintf(`
 		SELECT
 			%s,
@@ -80,6 +89,12 @@ var (
 			id = :id
 	`
 
+	queryDelete = `
+		DELETE FROM book_contents
+		WHERE
+			id = :id
+	`
+
 	queryDeleteByBookID = `
 		DELETE FROM book_contents
 		WHERE
@@ -89,10 +104,12 @@ var (
 
 var (
 	stmtGetByID        *sqlx.NamedStmt
+	stmtGetByIDs       *sqlx.NamedStmt
 	stmtGetByBookID    *sqlx.NamedStmt
 	stmtInsert         *sqlx.NamedStmt
 	stmtUpdate         *sqlx.NamedStmt
 	stmtSoftDelete     *sqlx.NamedStmt
+	stmtDelete         *sqlx.NamedStmt
 	stmtDeleteByBookID *sqlx.NamedStmt
 )
 
@@ -100,6 +117,10 @@ func Initialize() {
 	var err error
 
 	stmtGetByID, err = datastore.Get().Db.PrepareNamed(queryGetByID)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	stmtGetByIDs, err = datastore.Get().Db.PrepareNamed(queryGetByIDs)
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -116,6 +137,10 @@ func Initialize() {
 		logrus.Fatal(err)
 	}
 	stmtSoftDelete, err = datastore.Get().Db.PrepareNamed(querySoftDelete)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	stmtDelete, err = datastore.Get().Db.PrepareNamed(queryDelete)
 	if err != nil {
 		logrus.Fatal(err)
 	}

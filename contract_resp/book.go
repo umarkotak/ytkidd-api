@@ -34,6 +34,7 @@ type (
 		Active       bool          `json:"active"`
 		AccessTags   []string      `json:"access_tags"`
 		PdfUrl       string        `json:"pdf_url"`
+		CanAction    bool          `json:"can_action"`
 	}
 
 	BookContent struct {

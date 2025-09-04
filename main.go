@@ -205,6 +205,7 @@ func initializeHttpServer() {
 		rOptionalUserAuth.Get("/book/{slug}", book_handler.GetBookDetail)
 		rAdminAuth.Patch("/book/{id}", book_handler.UpdateBook)
 		rAdminAuth.Delete("/book/{id}", book_handler.DeleteBook)
+		rAdminAuth.Post("/book/{id}/page/remove", book_handler.RemoveBookPage)
 
 		ri.Get("/comfy_ui/output", comfy_ui_handler.Gallery)
 		ri.Post("/ai/chat", ai_handler.Chat)

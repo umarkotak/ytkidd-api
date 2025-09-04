@@ -51,6 +51,7 @@ func GetBookDetail(w http.ResponseWriter, r *http.Request) {
 
 	params := contract.GetBooks{
 		UserGuid: commonCtx.UserAuth.GUID,
+		UserRole: commonCtx.UserAuth.UserRole,
 		Slug:     chi.URLParam(r, "slug"),
 	}
 
@@ -72,6 +73,30 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := book_service.DeleteBook(ctx, params)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	render.Response(w, r, 200, nil)
+}
+
+func RemoveBookPage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	params := contract.RemoveBookPage{
+		BookID: utils.StringMustInt64(chi.URLParam(r, "id")),
+	}
+
+	err := utils.BindJson(r, &params)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	err = book_service.RemoveBookPage(ctx, params)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		render.Error(w, r, err, "")

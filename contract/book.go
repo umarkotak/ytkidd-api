@@ -33,6 +33,7 @@ type (
 
 	GetBooks struct {
 		UserGuid      string         `db:"-"`
+		UserRole      string         `db:"-"`
 		Slug          string         `db:"-"`
 		Title         string         `db:"title"`
 		Tags          pq.StringArray `db:"tags"`
@@ -46,6 +47,11 @@ type (
 
 	DeleteBook struct {
 		BookID int64 `db:"id"`
+	}
+
+	RemoveBookPage struct {
+		BookID         int64   `json:"-"`
+		BookContentIDs []int64 `json:"book_content_ids"`
 	}
 
 	UpdateBook struct {

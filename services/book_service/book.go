@@ -3,6 +3,7 @@ package book_service
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
@@ -159,6 +160,7 @@ func GetBookDetail(ctx context.Context, params contract.GetBooks) (contract_resp
 		AccessTags:   book.AccessTags,
 		Contents:     bookContentDatas,
 		PdfUrl:       pdfUrl,
+		CanAction:    slices.Contains(model.ADMIN_ROLES, params.UserRole),
 	}
 
 	return bookDetail, nil
@@ -253,6 +255,66 @@ func UpdateBook(ctx context.Context, params contract.UpdateBook) error {
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return err
+	}
+
+	return nil
+}
+
+func RemoveBookPage(ctx context.Context, params contract.RemoveBookPage) error {
+	var err error
+
+	book, err := book_repo.GetByID(ctx, params.BookID)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	bookContents, err := book_content_repo.GetByIDs(ctx, params.BookContentIDs)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	fileBucketGuids := make([]string, 0, len(bookContents)+1)
+	for _, bookContent := range bookContents {
+		fileBucketGuids = append(fileBucketGuids, bookContent.ImageFileGuid)
+	}
+
+	fileBuckets, err := file_bucket_repo.GetByGuids(ctx, fileBucketGuids)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	if book.Storage == model.STORAGE_R2 {
+		keys := make([]string, 0, len(fileBuckets))
+		for _, fileBucket := range fileBuckets {
+			keys = append(keys, fileBucket.ExactPath)
+		}
+		err = datastore.DeleteByKeys(ctx, keys)
+
+	} else {
+		for _, fileBucket := range fileBuckets {
+			err = utils.DeleteFileIfExists(fmt.Sprintf("%s/%s", config.Get().FileBucketPath, fileBucket.ExactPath))
+		}
+	}
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	err = file_bucket_repo.DeleteByGuids(ctx, nil, fileBucketGuids)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	for _, bookContent := range bookContents {
+		err = book_content_repo.Delete(ctx, nil, bookContent.ID)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
 	}
 
 	return nil

@@ -3,6 +3,7 @@ package book_content_repo
 import (
 	"context"
 
+	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/model"
 )
@@ -23,6 +24,18 @@ func GetByBookID(ctx context.Context, bookID int64) ([]model.BookContent, error)
 	objs := []model.BookContent{}
 	err := stmtGetByBookID.SelectContext(ctx, &objs, map[string]any{
 		"book_id": bookID,
+	})
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return objs, err
+	}
+	return objs, nil
+}
+
+func GetByIDs(ctx context.Context, ids pq.Int64Array) ([]model.BookContent, error) {
+	objs := []model.BookContent{}
+	err := stmtGetByIDs.SelectContext(ctx, &objs, map[string]any{
+		"ids": ids,
 	})
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
