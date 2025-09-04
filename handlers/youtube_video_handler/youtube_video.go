@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/contract"
 	"github.com/umarkotak/ytkidd-api/model"
+	"github.com/umarkotak/ytkidd-api/repos/youtube_video_repo"
 	"github.com/umarkotak/ytkidd-api/services/youtube_video_service"
 	"github.com/umarkotak/ytkidd-api/utils"
 	"github.com/umarkotak/ytkidd-api/utils/common_ctx"
@@ -55,4 +56,19 @@ func GetYoutubeVideoDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.Response(w, r, 200, youtubeVideoDetail)
+}
+
+func DeleteVideo(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	youtubeVideoID := utils.StringMustInt64(chi.URLParam(r, "id"))
+
+	err := youtube_video_repo.Delete(ctx, nil, youtubeVideoID)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	render.Response(w, r, 200, nil)
 }

@@ -164,6 +164,8 @@ func OptionalUserAuth(next http.Handler) http.Handler {
 			Name:     userAuth.Name,
 			Username: userAuth.Username,
 			Email:    userAuth.Email,
+			PhotoUrl: userAuth.PhotoUrl,
+			UserRole: userAuth.UserRole,
 		}
 
 		ctx = context.WithValue(r.Context(), common_ctx.CommonCtxKey, commonCtx)
