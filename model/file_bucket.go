@@ -11,6 +11,10 @@ import (
 const (
 	STORAGE_LOCAL = "local"
 	STORAGE_R2    = "r2"
+
+	PURPOSE_BOOK_CONTENT = "book_content"
+	PURPOSE_BOOK_COVER   = "book_cover"
+	PURPOSE_BOOK_PDF     = "book_pdf"
 )
 
 type (
@@ -32,6 +36,7 @@ type (
 	}
 
 	FileBucketMetadata struct {
+		Purpose string `json:"purpose"` // Enum: book_content, book_cover, book_pdf
 	}
 )
 

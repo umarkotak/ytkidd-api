@@ -204,6 +204,7 @@ func initializeHttpServer() {
 		rOptionalUserAuth.Get("/books", book_handler.GetBooks)
 		rOptionalUserAuth.Get("/book/{slug}", book_handler.GetBookDetail)
 		rAdminAuth.Patch("/book/{id}", book_handler.UpdateBook)
+		rAdminAuth.Patch("/book/{id}/cover", book_handler.UpdateBookCover)
 		rAdminAuth.Delete("/book/{id}", book_handler.DeleteBook)
 		rAdminAuth.Post("/book/{id}/page/remove", book_handler.RemoveBookPage)
 

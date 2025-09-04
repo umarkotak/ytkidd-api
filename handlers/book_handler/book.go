@@ -129,3 +129,35 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 
 	render.Response(w, r, 200, nil)
 }
+
+func UpdateBookCover(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	err := r.ParseMultipartForm(model.PDF_MAX_FILE_SIZE_MB)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	coverFile, _, err := r.FormFile("cover_file")
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	params := contract.UpdateBookCover{
+		BookID:    utils.StringMustInt64(chi.URLParam(r, "id")),
+		CoverFile: coverFile,
+	}
+
+	err = book_service.UpdateBookCover(ctx, params)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		render.Error(w, r, err, "")
+		return
+	}
+
+	render.Response(w, r, 200, nil)
+}

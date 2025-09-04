@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -80,4 +81,36 @@ func DeleteFolder(path string) error {
 	}
 
 	return os.RemoveAll(abs)
+}
+
+// CopyFile copies a file from src to dst.
+// If dst does not exist, it will be created.
+func CopyFile(src, dst string) error {
+	// Open the source file
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("failed to open source file: %w", err)
+	}
+	defer sourceFile.Close()
+
+	// Create the destination file
+	destFile, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("failed to create destination file: %w", err)
+	}
+	defer destFile.Close()
+
+	// Copy the contents
+	_, err = io.Copy(destFile, sourceFile)
+	if err != nil {
+		return fmt.Errorf("failed to copy file: %w", err)
+	}
+
+	// Ensure the file is flushed to disk
+	err = destFile.Sync()
+	if err != nil {
+		return fmt.Errorf("failed to flush destination file: %w", err)
+	}
+
+	return nil
 }

@@ -3,6 +3,8 @@ package book_service
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
 	"slices"
 
 	"github.com/jmoiron/sqlx"
@@ -18,6 +20,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/repos/user_repo"
 	"github.com/umarkotak/ytkidd-api/repos/user_subscription_repo"
 	"github.com/umarkotak/ytkidd-api/utils"
+	"github.com/umarkotak/ytkidd-api/utils/random"
 )
 
 func GetBooks(ctx context.Context, params contract.GetBooks) (contract_resp.GetBooks, error) {
@@ -179,8 +182,8 @@ func DeleteBook(ctx context.Context, params contract.DeleteBook) error {
 		return err
 	}
 
-	fileBucketGuids := make([]string, 0, len(bookContents)+1)
-	fileBucketGuids = append(fileBucketGuids, book.PdfFileGuid)
+	fileBucketGuids := make([]string, 0, len(bookContents)+2)
+	fileBucketGuids = append(fileBucketGuids, book.PdfFileGuid, book.CoverFileGuid)
 	for _, bookContent := range bookContents {
 		fileBucketGuids = append(fileBucketGuids, bookContent.ImageFileGuid)
 	}
@@ -315,6 +318,88 @@ func RemoveBookPage(ctx context.Context, params contract.RemoveBookPage) error {
 			logrus.WithContext(ctx).Error(err)
 			return err
 		}
+	}
+
+	return nil
+}
+
+func UpdateBookCover(ctx context.Context, params contract.UpdateBookCover) error {
+	book, err := book_repo.GetByID(ctx, params.BookID)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	fileBucket, err := file_bucket_repo.GetByGuid(ctx, book.CoverFileGuid)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	defer params.CoverFile.Close()
+	coverFileBytes, err := io.ReadAll(params.CoverFile)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	bookDir := fmt.Sprintf("%s/books/%s", config.Get().FileBucketPath, book.Slug)
+	utils.CreateFolderIfNotExists(bookDir)
+
+	coverObjectKey := fmt.Sprintf("books/%s/cover.jpeg", book.Slug)
+	coverPath := fmt.Sprintf("%s/cover.jpeg", bookDir)
+
+	err = os.WriteFile(coverPath, coverFileBytes, 0644)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	if fileBucket.Metadata.Purpose == model.PURPOSE_BOOK_COVER && book.Storage == model.STORAGE_LOCAL {
+		return nil
+	}
+
+	if fileBucket.Metadata.Purpose == model.PURPOSE_BOOK_COVER && book.Storage == model.STORAGE_R2 {
+		err = datastore.UploadFileToR2(ctx, coverPath, coverObjectKey, true)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+		return nil
+	}
+
+	coverGuid := random.MustGenUUIDTimes(2)
+	coverFileBucket := model.FileBucket{
+		Guid:            coverGuid,
+		Name:            fmt.Sprintf("book %v - cover", book.ID),
+		BaseType:        "image",
+		Extension:       "jpeg",
+		HttpContentType: "image/jpeg",
+		Metadata:        model.FileBucketMetadata{Purpose: model.PURPOSE_BOOK_COVER},
+		Data:            []byte{},
+		ExactPath:       coverObjectKey,
+		Storage:         book.Storage,
+		SizeKb:          0,
+	}
+	_, book.CoverFileGuid, err = file_bucket_repo.Insert(ctx, nil, coverFileBucket)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	err = book_repo.Update(ctx, nil, book)
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	if book.Storage == model.STORAGE_R2 {
+		err = datastore.UploadFileToR2(ctx, coverPath, coverObjectKey, true)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+		return nil
 	}
 
 	return nil

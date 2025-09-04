@@ -1,6 +1,8 @@
 package contract
 
 import (
+	"mime/multipart"
+
 	"github.com/lib/pq"
 	"github.com/umarkotak/ytkidd-api/model"
 )
@@ -64,5 +66,10 @@ type (
 		Active         bool           `json:"active" db:"active"`
 		OriginalPdfUrl string         `json:"original_pdf_url" db:"original_pdf_url"`
 		AccessTags     pq.StringArray `json:"access_tags" db:"access_tags"`
+	}
+
+	UpdateBookCover struct {
+		BookID    int64
+		CoverFile multipart.File
 	}
 )

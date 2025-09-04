@@ -130,7 +130,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			BaseType:        "application",
 			Extension:       "pdf",
 			HttpContentType: "application/pdf",
-			Metadata:        model.FileBucketMetadata{},
+			Metadata:        model.FileBucketMetadata{Purpose: model.PURPOSE_BOOK_PDF},
 			Data:            []byte{},
 			ExactPath:       bookObjectKey,
 			Storage:         params.Storage,
@@ -141,7 +141,6 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			return err
 		}
 
-		coverFileGuid := ""
 		for idx, filePath := range matches {
 			bookContentObjectKey := fmt.Sprintf("books/%s/%v.jpeg", params.Slug, idx+1)
 			if params.Storage == model.STORAGE_R2 {
@@ -159,7 +158,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 				BaseType:        "image",
 				Extension:       "jpeg",
 				HttpContentType: "image/jpeg",
-				Metadata:        model.FileBucketMetadata{},
+				Metadata:        model.FileBucketMetadata{Purpose: model.PURPOSE_BOOK_CONTENT},
 				Data:            []byte{},
 				ExactPath:       bookContentObjectKey,
 				Storage:         params.Storage,
@@ -184,15 +183,43 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 				return err
 			}
 
-			if idx == 0 {
-				coverFileGuid = fileGuid
-			}
-
 			successFilePaths = append(successFilePaths, filePath)
 			logrus.WithContext(ctx).Infof("success inserting image %v/%v", idx+1, len(matches))
 		}
 
-		book.CoverFileGuid = coverFileGuid
+		err = utils.CopyFile(matches[0], fmt.Sprintf("%s/%s", bookDir, "cover.jpeg"))
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+		bookCoverObjectKey := fmt.Sprintf("books/%s/cover.jpeg", params.Slug)
+		if params.Storage == model.STORAGE_R2 {
+			err = datastore.UploadFileToR2(ctx, bookCoverObjectKey, bookCoverObjectKey, false)
+			if err != nil {
+				logrus.WithContext(ctx).Error(err)
+				return err
+			}
+		}
+
+		coverGuid := random.MustGenUUIDTimes(2)
+		fileBucket := model.FileBucket{
+			Guid:            coverGuid,
+			Name:            fmt.Sprintf("book %v - cover", book.ID),
+			BaseType:        "image",
+			Extension:       "jpeg",
+			HttpContentType: "image/jpeg",
+			Metadata:        model.FileBucketMetadata{Purpose: model.PURPOSE_BOOK_COVER},
+			Data:            []byte{},
+			ExactPath:       bookCoverObjectKey,
+			Storage:         params.Storage,
+			SizeKb:          0,
+		}
+		_, book.CoverFileGuid, err = file_bucket_repo.Insert(ctx, tx, fileBucket)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+
 		err = book_repo.Update(ctx, tx, book)
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
