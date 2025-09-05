@@ -145,7 +145,7 @@ func initializeDependencies() {
 	}
 
 	payment_lib.Initialize(datastore.Get().Db, payment_lib.PaymentConf{
-		IsLive:             false,
+		IsLive:             config.Get().MidtransLive,
 		MidtransMerchantID: config.Get().MidtransMerchantID,
 		MidtransClientKey:  config.Get().MidtransClientKey,
 		MidtransServerKey:  config.Get().MidtransServerKey,
