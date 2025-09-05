@@ -194,7 +194,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 		}
 		bookCoverObjectKey := fmt.Sprintf("books/%s/cover.jpeg", params.Slug)
 		if params.Storage == model.STORAGE_R2 {
-			err = datastore.UploadFileToR2(ctx, bookCoverObjectKey, bookCoverObjectKey, false)
+			err = datastore.UploadFileToR2(ctx, fmt.Sprintf("%s/%s", config.Get().FileBucketPath, bookCoverObjectKey), bookCoverObjectKey, false)
 			if err != nil {
 				logrus.WithContext(ctx).Error(err)
 				return err
