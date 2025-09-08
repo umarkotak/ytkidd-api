@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS user_activities;
+DROP TABLE IF EXISTS user_strokes;
 DROP TABLE IF EXISTS user_subscriptions;
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS payments;

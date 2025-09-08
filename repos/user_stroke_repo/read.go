@@ -1,0 +1,23 @@
+package user_stroke_repo
+
+import (
+	"context"
+	"database/sql"
+
+	"github.com/sirupsen/logrus"
+	"github.com/umarkotak/ytkidd-api/model"
+)
+
+func GetByUserAndContent(ctx context.Context, userID sql.NullInt64, appSession sql.NullString, bookContentID sql.NullInt64) (model.UserStroke, error) {
+	obj := model.UserStroke{}
+	err := stmtGetByUserAndContent.GetContext(ctx, &obj, map[string]any{
+		"user_id":         userID,
+		"app_session":     appSession,
+		"book_content_id": bookContentID,
+	})
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return obj, err
+	}
+	return obj, nil
+}

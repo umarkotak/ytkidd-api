@@ -224,21 +224,21 @@ CREATE TABLE IF NOT EXISTS user_strokes (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   deleted_at TIMESTAMP WITH TIME ZONE,
 
-  book_id BIGINT NULL,
   user_id BIGINT NULL,
   app_session TEXT NULL,
+  book_id BIGINT NULL,
+  book_content_id BIGINT NULL,
 
   image_url TEXT NOT NULL,
-  tool TEXT NOT NULL,
-  color TEXT NOT NULL,
-  relative_size FLOAT NOT NULL,
-  opacity FLOAT NOT NULL,
-  points JSONB NOT NULL DEFAULT '[]',
+  strokes JSONB NOT NULL DEFAULT '[]',
 
   CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id),
-  CONSTRAINT fk_book_id FOREIGN KEY (book_id) REFERENCES books(id)
+  CONSTRAINT fk_book_id FOREIGN KEY (book_id) REFERENCES books(id),
+  CONSTRAINT fk_book_content_id FOREIGN KEY (book_content_id) REFERENCES book_contents(id)
 );
 ALTER SEQUENCE user_strokes_id_seq RESTART WITH 1;
+CREATE UNIQUE INDEX idx_user_strokes_user_id_app_session_book_content_id
+  ON user_strokes (user_id, app_session, book_content_id);
 
 CREATE TABLE IF NOT EXISTS user_activities (
   id SERIAL PRIMARY KEY,

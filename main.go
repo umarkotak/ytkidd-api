@@ -223,6 +223,9 @@ func initializeHttpServer() {
 		rUserAuth.Get("/order/list", order_handler.GetOrderList)
 		rUserAuth.Get("/order/{order_number}", order_handler.GetOrderDetail)
 
+		rOptionalUserAuth.Get("/book/user_stroke", book_handler.GetUserStroke)
+		rOptionalUserAuth.Post("/book/user_stroke", book_handler.StoreUserStroke)
+
 		ri.Post("/midtrans/callback/transaction", payment_lib.MidtransCallbackHandler)
 	})
 
