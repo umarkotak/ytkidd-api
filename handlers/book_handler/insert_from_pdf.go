@@ -30,7 +30,9 @@ type (
 )
 
 var (
-	uploadState = UploadState{}
+	uploadState = UploadState{
+		StatusMap: map[string]UploadBookStatus{},
+	}
 )
 
 func GetBooksUploadStatus(w http.ResponseWriter, r *http.Request) {
