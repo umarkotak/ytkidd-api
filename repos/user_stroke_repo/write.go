@@ -49,3 +49,26 @@ func Upsert(ctx context.Context, tx *sqlx.Tx, obj model.UserStroke) (int64, erro
 
 	return obj.ID, nil
 }
+
+func DeleteByBookID(ctx context.Context, tx *sqlx.Tx, bookID int64) error {
+	var err error
+
+	stmt := stmtDeleteByBookID
+	if tx != nil {
+		stmt, err = tx.PrepareNamedContext(ctx, queryDeleteByBookID)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+	}
+
+	_, err = stmt.ExecContext(ctx, map[string]any{
+		"book_id": bookID,
+	})
+	if err != nil {
+		logrus.WithContext(ctx).Error(err)
+		return err
+	}
+
+	return nil
+}

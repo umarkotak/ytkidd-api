@@ -18,6 +18,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/repos/file_bucket_repo"
 	"github.com/umarkotak/ytkidd-api/repos/user_repo"
+	"github.com/umarkotak/ytkidd-api/repos/user_stroke_repo"
 	"github.com/umarkotak/ytkidd-api/repos/user_subscription_repo"
 	"github.com/umarkotak/ytkidd-api/utils"
 	"github.com/umarkotak/ytkidd-api/utils/random"
@@ -195,6 +196,12 @@ func DeleteBook(ctx context.Context, params contract.DeleteBook) error {
 	}
 
 	err = datastore.Transaction(ctx, datastore.Get().Db, func(tx *sqlx.Tx) error {
+		err = user_stroke_repo.DeleteByBookID(ctx, tx, book.ID)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			return err
+		}
+
 		err = book_content_repo.DeleteByBookID(ctx, tx, book.ID)
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)

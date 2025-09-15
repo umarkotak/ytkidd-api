@@ -75,12 +75,19 @@ var (
 			strokes = :strokes
 		RETURNING id
 	`
+
+	queryDeleteByBookID = `
+		DELETE FROM user_strokes
+		WHERE
+			book_id = :book_id
+	`
 )
 
 var (
 	stmtGetByUserAndContent *sqlx.NamedStmt
 	stmtInsert              *sqlx.NamedStmt
 	stmtUpsert              *sqlx.NamedStmt
+	stmtDeleteByBookID      *sqlx.NamedStmt
 )
 
 func Initialize() {
@@ -95,6 +102,10 @@ func Initialize() {
 		logrus.Fatal(err)
 	}
 	stmtUpsert, err = datastore.Get().Db.PrepareNamed(queryUpsert)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	stmtDeleteByBookID, err = datastore.Get().Db.PrepareNamed(queryDeleteByBookID)
 	if err != nil {
 		logrus.Fatal(err)
 	}
