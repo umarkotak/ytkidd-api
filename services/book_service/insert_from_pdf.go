@@ -54,7 +54,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 		return err
 	}
 
-	outputPattern := filepath.Join(bookDir, "%d.jpeg")
+	outputPattern := filepath.Join(bookDir, "%04d.jpeg")
 	gsArgs := []string{
 		"-dNOPAUSE",     //
 		"-dBATCH",       //

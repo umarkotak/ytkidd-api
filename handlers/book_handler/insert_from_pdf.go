@@ -129,7 +129,6 @@ func InsertFromPdf(w http.ResponseWriter, r *http.Request) {
 			// render.Error(w, r, err, "")
 			return
 		}
-
 	}()
 
 	render.Response(w, r, 200, nil)
