@@ -251,6 +251,7 @@ CREATE TABLE IF NOT EXISTS user_activities (
   youtube_video_id BIGINT NULL,
   book_id BIGINT NULL,
   book_content_id BIGINT NULL,
+  metadata JSONB NOT NULL DEFAULT '{}',
 
   CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id),
   CONSTRAINT fk_youtube_video_id FOREIGN KEY (youtube_video_id) REFERENCES youtube_videos(id),
