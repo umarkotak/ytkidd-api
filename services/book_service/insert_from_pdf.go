@@ -141,8 +141,9 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			return err
 		}
 
+		logrus.Infof("MATCHES PAGE: %+v", matches)
 		for idx, filePath := range matches {
-			bookContentObjectKey := fmt.Sprintf("books/%s/%v.jpeg", params.Slug, idx+1)
+			bookContentObjectKey := fmt.Sprintf("books/%s/%04d.jpeg", params.Slug, idx+1)
 			if params.Storage == model.STORAGE_R2 {
 				err = datastore.UploadFileToR2(ctx, filePath, bookContentObjectKey, false)
 				if err != nil {

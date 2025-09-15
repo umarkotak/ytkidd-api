@@ -36,7 +36,9 @@ var (
 )
 
 func GetBooksUploadStatus(w http.ResponseWriter, r *http.Request) {
-	render.Response(w, r, 200, uploadState)
+	render.Response(w, r, 200, map[string]any{
+		"status_map": uploadState.StatusMap,
+	})
 }
 
 func InsertFromPdf(w http.ResponseWriter, r *http.Request) {
