@@ -23,7 +23,7 @@ type (
 		DeviceOs        string `json:"device_os"`        // X-Device-Os. device os, Eg: android/ios/windows/ubuntu/other
 		AppVersion      string `json:"app_version"`      // X-App-Version. Eg: 1.20.30
 		ActivitySession string `json:"activity_session"` // X-Activity-Session. generated every opening app
-		AppSession      string `json:"app_session"`      // Same with device id
+		AppSession      string `json:"app_session"`      // X-App-Session. Same with device id
 
 		UserAuth UserAuth `json:"user_auth"`
 	}

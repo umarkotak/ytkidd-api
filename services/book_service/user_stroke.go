@@ -31,7 +31,11 @@ func GetUserStroke(ctx context.Context, params contract.GetUserStroke) (contract
 		userID = sql.NullInt64{user.ID, true}
 	}
 
-	userStroke, err := user_stroke_repo.GetByUserAndContent(ctx, userID, sql.NullString{params.AppSession, true}, sql.NullInt64{params.BookContentID, true})
+	userStroke, err := user_stroke_repo.GetByUserAndContent(
+		ctx, userID,
+		sql.NullString{params.AppSession, params.AppSession != ""},
+		sql.NullInt64{params.BookContentID, params.BookContentID != 0},
+	)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return contract_resp.GetUserStroke{}, err
@@ -39,8 +43,8 @@ func GetUserStroke(ctx context.Context, params contract.GetUserStroke) (contract
 
 	return contract_resp.GetUserStroke{
 		ID:            userStroke.ID,
-		BookID:        userStroke.BookID,
-		BookContentID: userStroke.BookContentID,
+		BookID:        userStroke.BookID.Int64,
+		BookContentID: userStroke.BookContentID.Int64,
 		ImageUrl:      userStroke.ImageUrl,
 		Strokes:       userStroke.Strokes,
 	}, nil

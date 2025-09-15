@@ -28,9 +28,16 @@ var (
 			%s
 		FROM user_strokes us
 		WHERE
-			us.user_id = :user_id,
-			us.app_session = :app_session,
-			us.book_content_id = :book_content_id,
+			1 = 1
+			AND (
+				CASE
+					WHEN CAST(:user_id AS BIGINT) IS NULL
+					THEN us.user_id IS NULL
+					ELSE us.user_id = :user_id
+				END
+			)
+			AND us.app_session = :app_session
+			AND us.book_content_id = :book_content_id
 			AND us.deleted_at IS NULL
 	`, allColumns)
 
@@ -67,11 +74,12 @@ var (
 			:book_content_id,
 			:image_url,
 			:strokes
-		) RETURNING id
+		)
 		ON CONFLICT (user_id, app_session, book_content_id)
 		DO UPDATE SET
 			updated_at = NOW(),
 			strokes = :strokes
+		RETURNING id
 	`
 )
 

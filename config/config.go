@@ -51,7 +51,7 @@ func Initialize() {
 		R2AccessKeySecret: os.Getenv("R2_ACCESS_KEY_SECRET"),
 		R2StorageEndpoint: os.Getenv("R2_STORAGE_ENDPOINT"),
 		R2BucketName:      getEnvStringWithDefault("R2_BUCKET_NAME", "cabocil-bucket"),
-		R2PublicDomain:    getEnvStringWithDefault("R2_PUBLIC_DOMAIN", "https://cbdata.cloudflare-avatar-id-1.site"),
+		R2PublicDomain:    getEnvStringWithDefault("R2_PUBLIC_DOMAIN", "https://data.cabocil.com"),
 	}
 }
 

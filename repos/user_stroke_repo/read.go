@@ -9,6 +9,10 @@ import (
 )
 
 func GetByUserAndContent(ctx context.Context, userID sql.NullInt64, appSession sql.NullString, bookContentID sql.NullInt64) (model.UserStroke, error) {
+	// logrus.Infof("DAT: %+v", userID)
+	// logrus.Infof("DAT: %+v", appSession)
+	// logrus.Infof("DAT: %+v", bookContentID)
+
 	obj := model.UserStroke{}
 	err := stmtGetByUserAndContent.GetContext(ctx, &obj, map[string]any{
 		"user_id":         userID,
