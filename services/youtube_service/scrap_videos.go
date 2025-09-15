@@ -52,13 +52,19 @@ func ScrapVideos(ctx context.Context, params contract.ScrapVideos) (string, bool
 		}
 
 		if youtubeChannel.ID == 0 {
+			youtubeChannelDetail, err := GetYouTubeChannelDetails(config.Get().YoutubeApiKey, params.ChannelID)
+			if err != nil {
+				logrus.WithContext(ctx).Error(err)
+				return nextPageToken, someVideoExist, err
+			}
+
 			youtubeChannel = model.YoutubeChannel{
 				ExternalID:  params.ChannelID,
 				Name:        html.UnescapeString(item.Snippet.ChannelTitle),
 				Username:    html.UnescapeString(item.Snippet.ChannelTitle),
-				ImageUrl:    "",
+				ImageUrl:    youtubeChannelDetail.ThumbnailURL,
 				Tags:        []string{},
-				ChannelLink: "#",
+				ChannelLink: youtubeChannelDetail.URL,
 			}
 			youtubeChannel.ID, err = youtube_channel_repo.Insert(ctx, nil, youtubeChannel)
 			if err != nil {

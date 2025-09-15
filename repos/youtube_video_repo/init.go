@@ -84,7 +84,9 @@ var (
 		ORDER BY
 			CASE WHEN :sort = 'title_asc' THEN ytvid.title END ASC,
 			CASE WHEN :sort = 'title_desc' THEN ytvid.title END DESC,
+			CASE WHEN :sort = 'id_asc' THEN ytvid.published_at END ASC,
 			CASE WHEN :sort = 'id_asc' THEN ytvid.id END ASC,
+			CASE WHEN :sort = 'id_desc' THEN ytvid.published_at END DESC,
 			CASE WHEN :sort = 'id_desc' THEN ytvid.id END DESC,
 			CASE WHEN :sort = 'random' THEN RANDOM() END
 		LIMIT :limit OFFSET :offset

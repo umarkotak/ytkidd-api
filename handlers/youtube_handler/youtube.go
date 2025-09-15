@@ -27,6 +27,20 @@ func ScrapVideos(w http.ResponseWriter, r *http.Request) {
 		maxPage = model.YOUTUBE_MAX_PAGE
 	}
 
+	if params.ChannelID == "" && params.ChannelUrl == "" {
+		render.Error(w, r, err, "missing channel id or channel url")
+		return
+	}
+
+	if params.ChannelID == "" && params.ChannelUrl != "" {
+		params.ChannelID, err = youtube_service.GetChannelIDByChannelUrl(params.ChannelUrl)
+		if err != nil {
+			logrus.WithContext(ctx).Error(err)
+			render.Error(w, r, err, "")
+			return
+		}
+	}
+
 	for i := 1; i <= int(maxPage); i++ {
 		nextPageToken, someVideoExist, err := youtube_service.ScrapVideos(ctx, params)
 		if err != nil {
@@ -46,5 +60,5 @@ func ScrapVideos(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	render.Response(w, r, 200, nil)
+	render.Response(w, r, 200, params)
 }

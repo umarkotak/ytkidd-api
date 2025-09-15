@@ -45,7 +45,7 @@ func GetForSearch(ctx context.Context, params contract.YoutubeVideoSearch) ([]mo
 func GetByParams(ctx context.Context, params contract.GetYoutubeVideos) ([]model.YoutubeVideoDetailed, error) {
 	objs := []model.YoutubeVideoDetailed{}
 
-	params.SetDefault()
+	params.Pagination.SetDefault()
 	if params.Tags == nil {
 		params.Tags = []string{}
 	}

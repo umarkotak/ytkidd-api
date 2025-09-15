@@ -1,9 +1,12 @@
 package book_handler
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/contract"
@@ -13,6 +16,26 @@ import (
 	"github.com/umarkotak/ytkidd-api/utils"
 	"github.com/umarkotak/ytkidd-api/utils/render"
 )
+
+type (
+	UploadState struct {
+		StatusMap map[string]UploadBookStatus
+		sync.Mutex
+	}
+
+	UploadBookStatus struct {
+		Slug      string
+		CreatedAt time.Time
+	}
+)
+
+var (
+	uploadState = UploadState{}
+)
+
+func GetBooksUploadStatus(w http.ResponseWriter, r *http.Request) {
+	render.Response(w, r, 200, uploadState)
+}
 
 func InsertFromPdf(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -83,12 +106,27 @@ func InsertFromPdf(w http.ResponseWriter, r *http.Request) {
 		Tags:        utils.SplitString(r.FormValue("tags"), ","),
 	}
 
-	err = book_service.InsertFromPdf(ctx, params)
-	if err != nil {
-		logrus.WithContext(ctx).Error(err)
-		render.Error(w, r, err, "")
-		return
-	}
+	go func() {
+		uploadState.Lock()
+		uploadState.StatusMap[params.Slug] = UploadBookStatus{
+			Slug:      params.Slug,
+			CreatedAt: time.Now(),
+		}
+		uploadState.Unlock()
+		defer func() {
+			uploadState.Lock()
+			delete(uploadState.StatusMap, params.Slug)
+			uploadState.Unlock()
+		}()
+
+		err = book_service.InsertFromPdf(context.Background(), params)
+		if err != nil {
+			logrus.WithContext(context.Background()).Error(err)
+			// render.Error(w, r, err, "")
+			return
+		}
+
+	}()
 
 	render.Response(w, r, 200, nil)
 }
@@ -106,61 +144,76 @@ func InsertFromPdfUrls(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, oneParams := range params.Books {
-		book, _ := book_repo.GetBySlug(ctx, oneParams.Slug)
-		if book.ID > 0 {
-			continue
-		}
+	bgCtx := context.Background()
+	go func() {
+		for _, oneParams := range params.Books {
+			book, _ := book_repo.GetBySlug(bgCtx, oneParams.Slug)
+			if book.ID > 0 {
+				continue
+			}
 
-		if oneParams.PdfUrl == "" {
-			continue
-		}
+			if oneParams.PdfUrl == "" {
+				continue
+			}
 
-		httpClient := http.Client{}
-		resp, err := httpClient.Get(oneParams.PdfUrl)
-		if err != nil {
-			logrus.WithContext(ctx).Error(err)
-			render.Error(w, r, err, "")
-			return
-		}
-		defer resp.Body.Close()
+			uploadState.Lock()
+			uploadState.StatusMap[oneParams.Slug] = UploadBookStatus{
+				Slug:      oneParams.Slug,
+				CreatedAt: time.Now(),
+			}
+			uploadState.Unlock()
+			defer func() {
+				uploadState.Lock()
+				delete(uploadState.StatusMap, oneParams.Slug)
+				uploadState.Unlock()
+			}()
 
-		if resp.StatusCode != http.StatusOK {
-			logrus.WithContext(ctx).Error(err)
-			render.Error(w, r, err, "")
-			return
-		}
+			httpClient := http.Client{}
+			resp, err := httpClient.Get(oneParams.PdfUrl)
+			if err != nil {
+				logrus.WithContext(bgCtx).Error(err)
+				// render.Error(w, r, err, "")
+				return
+			}
+			defer resp.Body.Close()
 
-		pdfBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			logrus.WithContext(ctx).Error(err)
-			render.Error(w, r, err, "")
-			return
-		}
+			if resp.StatusCode != http.StatusOK {
+				logrus.WithContext(bgCtx).Error(err)
+				// render.Error(w, r, err, "")
+				return
+			}
 
-		if len(pdfBytes) == 0 {
-			continue
-		}
+			pdfBytes, err := io.ReadAll(resp.Body)
+			if err != nil {
+				logrus.WithContext(bgCtx).Error(err)
+				// render.Error(w, r, err, "")
+				return
+			}
 
-		insertFromPdfParams := contract.InsertFromPdf{
-			Slug:           oneParams.Slug,
-			Title:          oneParams.Title,
-			Description:    oneParams.Description,
-			PdfBytes:       pdfBytes,
-			ImgFormat:      oneParams.ImgFormat,
-			BookType:       oneParams.BookType,
-			OriginalPdfUrl: oneParams.PdfUrl,
-			Storage:        oneParams.Storage,
-			StorePdf:       oneParams.StorePdf,
-			Tags:           oneParams.Tags,
+			if len(pdfBytes) == 0 {
+				continue
+			}
+
+			insertFromPdfParams := contract.InsertFromPdf{
+				Slug:           oneParams.Slug,
+				Title:          oneParams.Title,
+				Description:    oneParams.Description,
+				PdfBytes:       pdfBytes,
+				ImgFormat:      oneParams.ImgFormat,
+				BookType:       oneParams.BookType,
+				OriginalPdfUrl: oneParams.PdfUrl,
+				Storage:        oneParams.Storage,
+				StorePdf:       oneParams.StorePdf,
+				Tags:           oneParams.Tags,
+			}
+			err = book_service.InsertFromPdf(bgCtx, insertFromPdfParams)
+			if err != nil {
+				logrus.WithContext(bgCtx).Error(err)
+				// render.Error(w, r, err, "")
+				return
+			}
 		}
-		err = book_service.InsertFromPdf(ctx, insertFromPdfParams)
-		if err != nil {
-			logrus.WithContext(ctx).Error(err)
-			render.Error(w, r, err, "")
-			return
-		}
-	}
+	}()
 
 	render.Response(w, r, 200, nil)
 }

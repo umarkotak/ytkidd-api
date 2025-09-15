@@ -199,6 +199,7 @@ func initializeHttpServer() {
 
 		ri.Post("/youtube/scrap_videos", youtube_handler.ScrapVideos)
 
+		rAdminAuth.Get("/books/upload_status", book_handler.GetBooksUploadStatus)
 		rAdminAuth.Post("/books/insert_from_pdf", book_handler.InsertFromPdf)
 		rAdminAuth.Post("/books/insert_from_pdf_urls", book_handler.InsertFromPdfUrls)
 		rOptionalUserAuth.Get("/books", book_handler.GetBooks)

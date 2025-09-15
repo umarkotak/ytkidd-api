@@ -47,8 +47,11 @@ func GetYoutubeChannelDetail(w http.ResponseWriter, r *http.Request) {
 
 	youtubeVideos, err := youtube_video_service.GetVideos(ctx, contract.GetYoutubeVideos{
 		ChannelIDs: []int64{youtubeChannelID},
-		Pagination: model.Pagination{Limit: 50},
 		Sort:       r.URL.Query().Get("sort"),
+		Pagination: model.Pagination{
+			Limit: utils.StringMustInt64(r.URL.Query().Get("limit")),
+			Page:  utils.StringMustInt64(r.URL.Query().Get("page")),
+		},
 	})
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
