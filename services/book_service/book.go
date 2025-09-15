@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"slices"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
@@ -58,9 +59,26 @@ func GetBooks(ctx context.Context, params contract.GetBooks) (contract_resp.GetB
 		logrus.WithContext(ctx).Error(err)
 	}
 
+	tagMap := map[string][]string{}
+	for _, tag := range tags {
+		if strings.HasPrefix(tag, "age:") {
+			if _, found := tagMap["age"]; !found {
+				tagMap["age"] = []string{tag}
+			} else {
+				tagMap["age"] = append(tagMap["age"], tag)
+			}
+		}
+
+		// Add ass needed later
+	}
+
 	tagGroup := []contract_resp.TagGroup{
 		{
-			Name: "All Tags",
+			Name: "Umur",
+			Tags: tagMap["age"],
+		},
+		{
+			Name: "Semua Tag",
 			Tags: tags,
 		},
 	}
