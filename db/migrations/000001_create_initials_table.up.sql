@@ -224,15 +224,14 @@ CREATE TABLE IF NOT EXISTS user_strokes (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   deleted_at TIMESTAMP WITH TIME ZONE,
 
-  user_id BIGINT NULL,
-  app_session TEXT NULL,
-  book_id BIGINT NULL,
-  book_content_id BIGINT NULL,
+  user_id BIGINT NOT NULL,
+  app_session TEXT NOT NULL,
+  book_id BIGINT NOT NULL,
+  book_content_id BIGINT NOT NULL,
 
   image_url TEXT NOT NULL,
   strokes JSONB NOT NULL DEFAULT '[]',
 
-  CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id),
   CONSTRAINT fk_book_id FOREIGN KEY (book_id) REFERENCES books(id),
   CONSTRAINT fk_book_content_id FOREIGN KEY (book_content_id) REFERENCES book_contents(id)
 );

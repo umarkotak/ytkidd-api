@@ -29,13 +29,7 @@ var (
 		FROM user_strokes us
 		WHERE
 			1 = 1
-			AND (
-				CASE
-					WHEN CAST(:user_id AS BIGINT) IS NULL
-					THEN us.user_id IS NULL
-					ELSE us.user_id = :user_id
-				END
-			)
+			AND us.user_id = :user_id
 			AND us.app_session = :app_session
 			AND us.book_content_id = :book_content_id
 			AND us.deleted_at IS NULL
