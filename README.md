@@ -4,6 +4,9 @@
 - font awesome list: https://fontawesome.com/search?o=r&m=free
 - channel id finder: https://commentpicker.com/youtube-channel-id.php
 
+## PRE REQUISITES
+- brew install caesiumclt
+
 ## Notes
 
 if you run your golang app on wsl, you might need to get the wsl ip

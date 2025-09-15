@@ -13,7 +13,7 @@ type (
 		Title          string
 		Description    string
 		PdfBytes       []byte
-		ImgFormat      string
+		ImgFormat      string // Enum: jpeg, png
 		BookType       string
 		OriginalPdfUrl string
 		Storage        string // Enum: local, r2

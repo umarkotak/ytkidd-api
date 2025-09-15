@@ -11,6 +11,9 @@ import (
 const (
 	ACCESS_TAG_FREE    = "free"
 	ACCESS_TAG_PREMIUM = "premium"
+
+	IMAGE_JPEG = "jpeg"
+	IMAGE_PNG  = "png"
 )
 
 type (

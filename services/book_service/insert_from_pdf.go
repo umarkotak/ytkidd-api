@@ -28,6 +28,15 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 		params.Storage = model.STORAGE_LOCAL
 	}
 
+	book, _ := book_repo.GetBySlug(ctx, params.Slug)
+	if book.ID != 0 {
+		return fmt.Errorf("book already exists")
+	}
+
+	logrus.Infof("EXECUTING UPLOAD: %+v", map[string]any{
+		"img_format": params.ImgFormat,
+	})
+
 	bookDir := fmt.Sprintf("%s/books/%s", config.Get().FileBucketPath, params.Slug)
 
 	err = utils.CreateFolderIfNotExists(bookDir)
@@ -55,16 +64,25 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 	}
 
 	outputPattern := filepath.Join(bookDir, "%04d.jpeg")
+	if params.ImgFormat == model.IMAGE_PNG {
+		outputPattern = filepath.Join(bookDir, "%04d.png")
+	}
+
 	gsArgs := []string{
-		"-dNOPAUSE",     //
-		"-dBATCH",       //
-		"-dSAFER",       //
-		"-sDEVICE=jpeg", //
-		"-dJPEGQ=90",    //
-		"-r225",         // Resolution in DPI
+		"-dNOPAUSE", //
+		"-dBATCH",   //
+		"-dSAFER",   //
+		"-r225",     // Resolution in DPI
+	}
+	if params.ImgFormat == model.IMAGE_PNG {
+		gsArgs = append(gsArgs, "-sDEVICE=png16m")
+	} else {
+		gsArgs = append(gsArgs, "-sDEVICE=jpeg", "-dJPEGQ=80")
+	}
+	gsArgs = append(gsArgs,
 		fmt.Sprintf("-sOutputFile=%s", outputPattern), //
 		pdfFilePath, //
-	}
+	)
 
 	cmd := exec.Command("/opt/homebrew/bin/gs", gsArgs...)
 	output, err := cmd.CombinedOutput()
@@ -76,6 +94,9 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 	}
 
 	pattern := filepath.Join(bookDir, "*.jpeg")
+	if params.ImgFormat == model.IMAGE_PNG {
+		pattern = filepath.Join(bookDir, "*.png")
+	}
 	matches, err := filepath.Glob(pattern)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
@@ -143,6 +164,47 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 
 		logrus.Infof("MATCHES PAGE: %+v", matches)
 		for idx, filePath := range matches {
+			logrus.Infof("comporessing image start")
+			if params.ImgFormat == model.IMAGE_PNG {
+				cmdComp1 := exec.Command(
+					"caesiumclt", "--lossless",
+					"-o", bookDir, filePath,
+				)
+				output1, err := cmdComp1.CombinedOutput()
+				if err != nil {
+					logrus.WithContext(ctx).WithFields(logrus.Fields{
+						"cmd_output": output1,
+					}).Error(err)
+					return err
+				}
+
+			} else {
+				cmdComp1 := exec.Command(
+					"caesiumclt", "--lossless",
+					"-o", bookDir, filePath,
+				)
+				output1, err := cmdComp1.CombinedOutput()
+				if err != nil {
+					logrus.WithContext(ctx).WithFields(logrus.Fields{
+						"cmd_output": output1,
+					}).Error(err)
+					return err
+				}
+
+				cmdComp2 := exec.Command(
+					"caesiumclt", "-q", "60",
+					"-o", bookDir, filePath,
+				)
+				output2, err := cmdComp2.CombinedOutput()
+				if err != nil {
+					logrus.WithContext(ctx).WithFields(logrus.Fields{
+						"cmd_output": output2,
+					}).Error(err)
+					return err
+				}
+			}
+			logrus.Infof("comporessing image finish")
+
 			bookContentObjectKey := fmt.Sprintf("books/%s/%04d.jpeg", params.Slug, idx+1)
 			if params.Storage == model.STORAGE_R2 {
 				err = datastore.UploadFileToR2(ctx, filePath, bookContentObjectKey, false)
@@ -157,8 +219,8 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 				Guid:            guid,
 				Name:            fmt.Sprintf("book %v - page %v", book.ID, idx+1),
 				BaseType:        "image",
-				Extension:       "jpeg",
-				HttpContentType: "image/jpeg",
+				Extension:       params.ImgFormat,
+				HttpContentType: fmt.Sprintf("image/%s", params.ImgFormat),
 				Metadata:        model.FileBucketMetadata{Purpose: model.PURPOSE_BOOK_CONTENT},
 				Data:            []byte{},
 				ExactPath:       bookContentObjectKey,
@@ -188,12 +250,12 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			logrus.WithContext(ctx).Infof("success inserting image %v/%v", idx+1, len(matches))
 		}
 
-		err = utils.CopyFile(matches[0], fmt.Sprintf("%s/%s", bookDir, "cover.jpeg"))
+		err = utils.CopyFile(matches[0], fmt.Sprintf("%s/%s.%s", bookDir, "cover", params.ImgFormat))
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
 			return err
 		}
-		bookCoverObjectKey := fmt.Sprintf("books/%s/cover.jpeg", params.Slug)
+		bookCoverObjectKey := fmt.Sprintf("books/%s/cover.%s", params.Slug, params.ImgFormat)
 		if params.Storage == model.STORAGE_R2 {
 			err = datastore.UploadFileToR2(ctx, fmt.Sprintf("%s/%s", config.Get().FileBucketPath, bookCoverObjectKey), bookCoverObjectKey, false)
 			if err != nil {
@@ -207,8 +269,8 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			Guid:            coverGuid,
 			Name:            fmt.Sprintf("book %v - cover", book.ID),
 			BaseType:        "image",
-			Extension:       "jpeg",
-			HttpContentType: "image/jpeg",
+			Extension:       params.ImgFormat,
+			HttpContentType: fmt.Sprintf("image/%s", params.ImgFormat),
 			Metadata:        model.FileBucketMetadata{Purpose: model.PURPOSE_BOOK_COVER},
 			Data:            []byte{},
 			ExactPath:       bookCoverObjectKey,

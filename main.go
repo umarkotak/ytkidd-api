@@ -49,6 +49,8 @@ import (
 )
 
 func main() {
+	quickExec()
+
 	logrus.SetReportCaller(true)
 	logrus.SetFormatter(&log_formatter.Formatter{})
 	logrus.AddHook(&log_hook.LogrusHook{})
