@@ -32,6 +32,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/repos/google_repo"
 	"github.com/umarkotak/ytkidd-api/repos/order_repo"
 	"github.com/umarkotak/ytkidd-api/repos/product_repo"
+	"github.com/umarkotak/ytkidd-api/repos/user_activity_repo"
 	"github.com/umarkotak/ytkidd-api/repos/user_repo"
 	"github.com/umarkotak/ytkidd-api/repos/user_stroke_repo"
 	"github.com/umarkotak/ytkidd-api/repos/user_subscription_repo"
@@ -166,6 +167,7 @@ func initializeDependencies() {
 	order_repo.Initialize()
 	user_subscription_repo.Initialize()
 	user_stroke_repo.Initialize()
+	user_activity_repo.Initialize()
 
 	word_censor_lib.Initialize(word_censor_lib.WordCensorLib{
 		Words: []string{"kucing", "anjing", "gajah"},
@@ -230,6 +232,9 @@ func initializeHttpServer() {
 
 		rOptionalUserAuth.Get("/book/user_stroke", book_handler.GetUserStroke)
 		rOptionalUserAuth.Post("/book/user_stroke", book_handler.StoreUserStroke)
+
+		rOptionalUserAuth.Get("/user/activities", user_handler.GetUserActivities)
+		rOptionalUserAuth.Post("/user/activity", user_handler.PostUserActivity)
 
 		ri.Post("/midtrans/callback/transaction", payment_lib.MidtransCallbackHandler)
 	})

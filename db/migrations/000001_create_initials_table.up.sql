@@ -245,16 +245,13 @@ CREATE TABLE IF NOT EXISTS user_activities (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   deleted_at TIMESTAMP WITH TIME ZONE,
 
-  user_id BIGINT NULL,
-  app_session TEXT NULL,
-  youtube_video_id BIGINT NULL,
-  book_id BIGINT NULL,
-  book_content_id BIGINT NULL,
-  metadata JSONB NOT NULL DEFAULT '{}',
-
-  CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id),
-  CONSTRAINT fk_youtube_video_id FOREIGN KEY (youtube_video_id) REFERENCES youtube_videos(id),
-  CONSTRAINT fk_book_id FOREIGN KEY (book_id) REFERENCES books(id),
-  CONSTRAINT fk_book_content_id FOREIGN KEY (book_content_id) REFERENCES book_contents(id)
+  user_id BIGINT NOT NULL,
+  app_session TEXT NOT NULL,
+  youtube_video_id BIGINT NOT NULL,
+  book_id BIGINT NOT NULL,
+  book_content_id BIGINT NOT NULL,
+  metadata JSONB NOT NULL DEFAULT '{}'
 );
 ALTER SEQUENCE user_activities_id_seq RESTART WITH 1;
+CREATE UNIQUE INDEX idx_user_activities_single_activity
+  ON user_activities (user_id, app_session, youtube_video_id, book_id, book_content_id);
