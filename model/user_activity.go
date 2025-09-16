@@ -24,6 +24,10 @@ type (
 	}
 
 	UserActivityMetadata struct {
+		LastReadBookContentID int64 `json:"last_read_book_content_id"`
+		CurrentProgress       int64 `json:"current_progress"`
+		MinProgress           int64 `json:"min_progress"`
+		MaxProgress           int64 `json:"max_progress"`
 	}
 )
 
