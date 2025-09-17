@@ -2,6 +2,7 @@ package user_stroke_repo
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/model"
@@ -18,7 +19,7 @@ func GetByUserAndContent(ctx context.Context, userID int64, appSession string, b
 		"app_session":     appSession,
 		"book_content_id": bookContentID,
 	})
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		logrus.WithContext(ctx).Error(err)
 		return obj, err
 	}

@@ -22,6 +22,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/repos/user_stroke_repo"
 	"github.com/umarkotak/ytkidd-api/repos/user_subscription_repo"
 	"github.com/umarkotak/ytkidd-api/utils"
+	"github.com/umarkotak/ytkidd-api/utils/file_bucket"
 	"github.com/umarkotak/ytkidd-api/utils/random"
 )
 
@@ -34,19 +35,12 @@ func GetBooks(ctx context.Context, params contract.GetBooks) (contract_resp.GetB
 
 	bookDatas := []contract_resp.Book{}
 	for _, book := range books {
-		var coverFileUrl string
-		if book.Storage == model.STORAGE_R2 {
-			coverFileUrl, _ = datastore.GetObjectUrl(ctx, book.CoverFilePath)
-		} else {
-			coverFileUrl = utils.GenRawFileUrl(config.Get().FileBucketPath, book.CoverFilePath)
-		}
-
 		bookData := contract_resp.Book{
 			ID:           book.ID,
 			Slug:         book.Slug,
 			Title:        book.Title,
 			Description:  book.Description,
-			CoverFileUrl: coverFileUrl,
+			CoverFileUrl: file_bucket.GenFinalUrl(ctx, book.Storage, book.CoverFilePath),
 			Tags:         book.Tags,
 			Type:         book.Type,
 			IsFree:       book.IsFree(),
@@ -139,18 +133,11 @@ func GetBookDetail(ctx context.Context, params contract.GetBooks) (contract_resp
 
 	bookContentDatas := []contract_resp.BookContent{}
 	for _, bookContent := range bookContents {
-		var imageFileUrl string
-		if book.Storage == model.STORAGE_R2 {
-			imageFileUrl, _ = datastore.GetObjectUrl(ctx, bookContent.ImageFilePath)
-		} else {
-			imageFileUrl = utils.GenRawFileUrl(config.Get().FileBucketPath, bookContent.ImageFilePath)
-		}
-
 		bookContentData := contract_resp.BookContent{
 			ID:           bookContent.ID,
 			BookID:       bookContent.BookID,
 			PageNumber:   bookContent.PageNumber,
-			ImageFileUrl: imageFileUrl,
+			ImageFileUrl: file_bucket.GenFinalUrl(ctx, book.Storage, bookContent.ImageFilePath),
 			Description:  bookContent.Description,
 		}
 
@@ -165,18 +152,12 @@ func GetBookDetail(ctx context.Context, params contract.GetBooks) (contract_resp
 	// 	pdfUrl = utils.GenRawFileUrl(config.Get().FileBucketPath, book.PdfFileGuid)
 	// }
 
-	var coverFileUrl string
-	if book.Storage == model.STORAGE_R2 {
-		coverFileUrl, _ = datastore.GetObjectUrl(ctx, book.CoverFilePath)
-	} else {
-		coverFileUrl = utils.GenRawFileUrl(config.Get().FileBucketPath, book.CoverFilePath)
-	}
 	bookDetail := contract_resp.BookDetail{
 		ID:           book.ID,
 		Slug:         book.Slug,
 		Title:        book.Title,
 		Description:  book.Description,
-		CoverFileUrl: coverFileUrl,
+		CoverFileUrl: file_bucket.GenFinalUrl(ctx, book.Storage, book.CoverFilePath),
 		Tags:         book.Tags,
 		Type:         book.Type,
 		AccessTags:   book.AccessTags,
@@ -246,7 +227,7 @@ func DeleteBook(ctx context.Context, params contract.DeleteBook) error {
 			err = datastore.DeleteByKeys(ctx, keys)
 
 		} else {
-			err = utils.DeleteFolder(fmt.Sprintf("%s/books/%s", config.Get().FileBucketPath, book.Slug))
+			err = file_bucket.DeleteFolder(fmt.Sprintf("%s/books/%s", config.Get().FileBucketPath, book.Slug))
 		}
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
@@ -323,7 +304,7 @@ func RemoveBookPage(ctx context.Context, params contract.RemoveBookPage) error {
 
 	} else {
 		for _, fileBucket := range fileBuckets {
-			err = utils.DeleteFileIfExists(fmt.Sprintf("%s/%s", config.Get().FileBucketPath, fileBucket.ExactPath))
+			err = file_bucket.DeleteFileIfExists(fmt.Sprintf("%s/%s", config.Get().FileBucketPath, fileBucket.ExactPath))
 		}
 	}
 	if err != nil {
@@ -369,7 +350,7 @@ func UpdateBookCover(ctx context.Context, params contract.UpdateBookCover) error
 	}
 
 	bookDir := fmt.Sprintf("%s/books/%s", config.Get().FileBucketPath, book.Slug)
-	utils.CreateFolderIfNotExists(bookDir)
+	file_bucket.CreateFolderIfNotExists(bookDir)
 
 	coverObjectKey := fmt.Sprintf("books/%s/cover.jpeg", book.Slug)
 	coverPath := fmt.Sprintf("%s/cover.jpeg", bookDir)

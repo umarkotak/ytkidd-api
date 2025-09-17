@@ -10,6 +10,7 @@ type (
 		YoutubeVideoId int64  `db:"youtube_video_id"`
 		BookId         int64  `db:"book_id"`
 		BookContentId  int64  `db:"book_content_id"`
+		model.Pagination
 	}
 
 	RecordUserActivity struct {

@@ -13,6 +13,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/umarkotak/ytkidd-api/contract"
+	"github.com/umarkotak/ytkidd-api/model"
 	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/services/book_service"
 )
@@ -116,9 +117,9 @@ func Scrap() {
 			Title:       item.Title,
 			Description: item.Description,
 			ImgFormat:   imgExtension,
-			BookType:    "default", // Hardcoded value
-			Storage:     "local",   // Hardcoded value
-			StorePDF:    false,     // Hardcoded value
+			BookType:    model.BOOK_TYPE_DEFAULT, // Hardcoded value
+			Storage:     "local",                 // Hardcoded value
+			StorePDF:    false,                   // Hardcoded value
 			Tags:        tags,
 		})
 	}

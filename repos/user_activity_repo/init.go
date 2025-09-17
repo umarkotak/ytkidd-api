@@ -33,6 +33,7 @@ var (
 			AND ua.app_session = :app_session
 			AND ua.deleted_at IS NULL
 		ORDER BY ua.updated_at DESC
+		LIMIT :limit OFFSET :offset
 	`, allColumns)
 
 	queryGetFullByParams = `
@@ -46,17 +47,31 @@ var (
 			ua.youtube_video_id,
 			ua.book_id,
 			ua.book_content_id,
-			ua.metadata
+			ua.metadata,
+			yv.title AS youtube_video_title,
+			yv.image_url AS youtube_video_image_url,
+			yc.name AS youtube_channel_name,
+			yc.image_url AS youtube_channel_image_url,
+			b.title AS book_title,
+			b.cover_file_guid AS book_cover_file_guid,
+			b.slug AS book_slug,
+			fb.storage AS book_cover_storage,
+			fb.exact_path AS book_cover_exact_path,
+			b.type AS book_type,
+			bc.page_number AS book_last_read_page_number
 		FROM user_activities ua
 		LEFT JOIN books b ON b.id = ua.book_id
-		LEFT JOIN book_contents bc on bc.id = ua.book_content_id
+		LEFT JOIN book_contents bc ON bc.id = CAST(ua.metadata->>'last_read_book_content_id' AS BIGINT)
 		LEFT JOIN youtube_videos yv ON yv.id = ua.youtube_video_id
+		LEFT JOIN youtube_channels yc ON yc.id = yv.youtube_channel_id
+		LEFT JOIN file_bucket fb ON fb.guid = b.cover_file_guid
 		WHERE
 			1 = 1
 			AND ua.user_id = :user_id
 			AND ua.app_session = :app_session
 			AND ua.deleted_at IS NULL
 		ORDER BY ua.updated_at DESC
+		LIMIT :limit OFFSET :offset
 	`
 
 	queryGetByUserActivity = fmt.Sprintf(`
@@ -84,11 +99,25 @@ var (
 			ua.youtube_video_id,
 			ua.book_id,
 			ua.book_content_id,
-			ua.metadata
+			ua.metadata,
+			ua.metadata,
+			yv.title AS youtube_video_title,
+			yv.image_url AS youtube_video_image_url,
+			yc.name AS youtube_channel_name,
+			yc.image_url AS youtube_channel_image_url,
+			b.title AS book_title,
+			b.cover_file_guid AS book_cover_file_guid,
+			b.slug AS book_slug,
+			fb.storage AS book_cover_storage,
+			fb.exact_path AS book_cover_exact_path,
+			b.type AS book_type,
+			bc.page_number AS book_last_read_page_number
 		FROM user_activities ua
 		LEFT JOIN books b ON b.id = ua.book_id
-		LEFT JOIN book_contents bc on bc.id = ua.book_content_id
+		LEFT JOIN book_contents bc ON bc.id = CAST(ua.metadata->>'last_read_book_content_id' AS BIGINT)
 		LEFT JOIN youtube_videos yv ON yv.id = ua.youtube_video_id
+		LEFT JOIN youtube_channels yc ON yc.id = yv.youtube_channel_id
+		LEFT JOIN file_bucket fb ON fb.guid = b.cover_file_guid
 		WHERE
 			1 = 1
 			AND ua.user_id = :user_id

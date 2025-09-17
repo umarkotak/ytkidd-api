@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+const (
+	ACTIVITY_VIDEO = "video"
+	ACTIVITY_BOOK  = "book"
+)
+
 type (
 	UserActivity struct {
 		ID        int64        `db:"id"`
@@ -21,6 +26,32 @@ type (
 		BookID               int64                `db:"book_id"`
 		BookContentID        int64                `db:"book_content_id"`
 		UserActivityMetadata UserActivityMetadata `db:"metadata"`
+	}
+
+	UserActivityFull struct {
+		ID        int64        `db:"id"`
+		CreatedAt time.Time    `db:"created_at"`
+		UpdatedAt time.Time    `db:"updated_at"`
+		DeletedAt sql.NullTime `db:"deleted_at"`
+
+		UserID               int64                `db:"user_id"`
+		AppSession           string               `db:"app_session"`
+		YoutubeVideoID       int64                `db:"youtube_video_id"`
+		BookID               int64                `db:"book_id"`
+		BookContentID        int64                `db:"book_content_id"`
+		UserActivityMetadata UserActivityMetadata `db:"metadata"`
+
+		YoutubeVideoTitle      sql.NullString `db:"youtube_video_title"`
+		YoutubeVideoImageUrl   sql.NullString `db:"youtube_video_image_url"`
+		YoutubeChannelName     sql.NullString `db:"youtube_channel_name"`
+		YoutubeChannelImageUrl sql.NullString `db:"youtube_channel_image_url"`
+		BookTitle              sql.NullString `db:"book_title"`
+		BookCoverFileGuid      sql.NullString `db:"book_cover_file_guid"`
+		BookCoverStorage       sql.NullString `db:"book_cover_storage"`
+		BookCoverExactPath     sql.NullString `db:"book_cover_exact_path"`
+		BookType               sql.NullString `db:"book_type"`
+		BookSlug               sql.NullString `db:"book_slug"`
+		BookLastReadPageNumber sql.NullInt64  `db:"book_last_read_page_number"`
 	}
 
 	UserActivityMetadata struct {

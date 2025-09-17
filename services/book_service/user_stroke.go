@@ -2,6 +2,7 @@ package book_service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/sirupsen/logrus"
@@ -33,9 +34,18 @@ func GetUserStroke(ctx context.Context, params contract.GetUserStroke) (contract
 	userStroke, err := user_stroke_repo.GetByUserAndContent(
 		ctx, userID, params.AppSession, params.BookContentID,
 	)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		logrus.WithContext(ctx).Error(err)
 		return contract_resp.GetUserStroke{}, err
+	}
+	if err == sql.ErrNoRows {
+		return contract_resp.GetUserStroke{
+			ID:            userStroke.ID,
+			BookID:        userStroke.BookID,
+			BookContentID: userStroke.BookContentID,
+			ImageUrl:      userStroke.ImageUrl,
+			Strokes:       model.Strokes{},
+		}, nil
 	}
 
 	return contract_resp.GetUserStroke{

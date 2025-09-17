@@ -1,6 +1,7 @@
-package utils
+package file_bucket
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -8,6 +9,8 @@ import (
 	"path/filepath"
 
 	"github.com/umarkotak/ytkidd-api/config"
+	"github.com/umarkotak/ytkidd-api/datastore"
+	"github.com/umarkotak/ytkidd-api/model"
 )
 
 func CreateFolderIfNotExists(path string) error {
@@ -33,6 +36,16 @@ func GenFileUrl(guid string) string {
 
 func GenRawFileUrl(bucketName, fileBucketPath string) string {
 	return fmt.Sprintf("%s/%s/%s", config.Get().AppHost, bucketName, fileBucketPath)
+}
+
+func GenFinalUrl(ctx context.Context, storageType, coverFilePath string) string {
+	var coverFileUrl string
+	if storageType == model.STORAGE_R2 {
+		coverFileUrl, _ = datastore.GetObjectUrl(ctx, coverFilePath)
+	} else {
+		coverFileUrl = GenRawFileUrl(config.Get().FileBucketPath, coverFilePath)
+	}
+	return coverFileUrl
 }
 
 func DeleteFileIfExists(filePath string) error {

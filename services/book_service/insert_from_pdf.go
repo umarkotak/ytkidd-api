@@ -17,7 +17,7 @@ import (
 	"github.com/umarkotak/ytkidd-api/repos/book_content_repo"
 	"github.com/umarkotak/ytkidd-api/repos/book_repo"
 	"github.com/umarkotak/ytkidd-api/repos/file_bucket_repo"
-	"github.com/umarkotak/ytkidd-api/utils"
+	"github.com/umarkotak/ytkidd-api/utils/file_bucket"
 	"github.com/umarkotak/ytkidd-api/utils/random"
 )
 
@@ -39,20 +39,20 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 
 	bookDir := fmt.Sprintf("%s/books/%s", config.Get().FileBucketPath, params.Slug)
 
-	err = utils.CreateFolderIfNotExists(bookDir)
+	err = file_bucket.CreateFolderIfNotExists(bookDir)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
 		return err
 	}
 	defer func() {
 		if err != nil {
-			utils.DeleteFolder(bookDir)
+			file_bucket.DeleteFolder(bookDir)
 			if params.Storage == model.STORAGE_R2 {
 				datastore.DeleteObjectsByPrefix(ctx, fmt.Sprintf("books/%s", params.Slug))
 			}
 		}
 		if params.Storage == model.STORAGE_R2 {
-			utils.DeleteFolder(bookDir)
+			file_bucket.DeleteFolder(bookDir)
 		}
 	}()
 
@@ -123,7 +123,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 	successFilePaths := []string{}
 	err = datastore.Transaction(ctx, datastore.Get().Db, func(tx *sqlx.Tx) error {
 		pdfFileGuid := random.MustGenUUIDTimes(2)
-		bookType := "default"
+		bookType := model.BOOK_TYPE_DEFAULT
 		if params.BookType != "" {
 			bookType = params.BookType
 		}
@@ -250,7 +250,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 			logrus.WithContext(ctx).Infof("success inserting image %v/%v", idx+1, len(matches))
 		}
 
-		err = utils.CopyFile(matches[0], fmt.Sprintf("%s/%s.%s", bookDir, "cover", params.ImgFormat))
+		err = file_bucket.CopyFile(matches[0], fmt.Sprintf("%s/%s.%s", bookDir, "cover", params.ImgFormat))
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
 			return err
@@ -297,7 +297,7 @@ func InsertFromPdf(ctx context.Context, params contract.InsertFromPdf) error {
 	}
 
 	if !params.StorePdf {
-		err = utils.DeleteFileIfExists(pdfFilePath)
+		err = file_bucket.DeleteFileIfExists(pdfFilePath)
 		if err != nil {
 			logrus.WithContext(ctx).Error(err)
 		}

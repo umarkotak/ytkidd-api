@@ -14,6 +14,9 @@ const (
 
 	IMAGE_JPEG = "jpeg"
 	IMAGE_PNG  = "png"
+
+	BOOK_TYPE_DEFAULT  = "default"
+	BOOK_TYPE_WORKBOOK = "workbook"
 )
 
 type (

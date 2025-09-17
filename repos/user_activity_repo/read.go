@@ -20,8 +20,8 @@ func GetByParams(ctx context.Context, params contract.GetUserActivity) ([]model.
 	return objs, nil
 }
 
-func GetFullByParams(ctx context.Context, params contract.GetUserActivity) ([]model.UserActivity, error) {
-	objs := []model.UserActivity{}
+func GetFullByParams(ctx context.Context, params contract.GetUserActivity) ([]model.UserActivityFull, error) {
+	objs := []model.UserActivityFull{}
 
 	err := stmtGetFullByParams.SelectContext(ctx, &objs, params)
 	if err != nil {
@@ -44,8 +44,8 @@ func GetByUserActivity(ctx context.Context, params contract.GetUserActivity) (mo
 	return obj, nil
 }
 
-func GetFullByUserActivity(ctx context.Context, params contract.GetUserActivity) (model.UserActivity, error) {
-	obj := model.UserActivity{}
+func GetFullByUserActivity(ctx context.Context, params contract.GetUserActivity) (model.UserActivityFull, error) {
+	obj := model.UserActivityFull{}
 
 	err := stmtGetFullByUserActivity.GetContext(ctx, &obj, params)
 	if err != nil {
