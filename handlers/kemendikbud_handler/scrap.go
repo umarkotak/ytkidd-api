@@ -7,8 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -102,7 +100,7 @@ func Scrap() {
 	// Iterate over the results and transform each one.
 	for _, item := range sourceData.Results {
 		// Derive image format from the image URL extension.
-		imgExtension := strings.TrimPrefix(filepath.Ext(item.Image), ".")
+		// imgExtension := strings.TrimPrefix(filepath.Ext(item.Image), ".")
 
 		// Create the tags slice.
 		tags := []string{
@@ -116,7 +114,7 @@ func Scrap() {
 			Slug:        item.Slug,
 			Title:       item.Title,
 			Description: item.Description,
-			ImgFormat:   imgExtension,
+			ImgFormat:   model.IMAGE_JPEG,
 			BookType:    model.BOOK_TYPE_DEFAULT, // Hardcoded value
 			Storage:     "local",                 // Hardcoded value
 			StorePDF:    false,                   // Hardcoded value
