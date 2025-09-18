@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -20,7 +19,7 @@ import (
 type (
 	UploadState struct {
 		StatusMap map[string]UploadBookStatus
-		sync.Mutex
+		// sync.Mutex
 	}
 
 	UploadBookStatus struct {
@@ -111,16 +110,12 @@ func InsertFromPdf(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		uploadState.Lock()
 		uploadState.StatusMap[params.Slug] = UploadBookStatus{
 			Slug:      params.Slug,
 			CreatedAt: time.Now(),
 		}
-		uploadState.Unlock()
 		defer func() {
-			uploadState.Lock()
 			delete(uploadState.StatusMap, params.Slug)
-			uploadState.Unlock()
 		}()
 
 		err = book_service.InsertFromPdf(context.Background(), params)
@@ -159,16 +154,12 @@ func InsertFromPdfUrls(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			uploadState.Lock()
 			uploadState.StatusMap[oneParams.Slug] = UploadBookStatus{
 				Slug:      oneParams.Slug,
 				CreatedAt: time.Now(),
 			}
-			uploadState.Unlock()
 			defer func() {
-				uploadState.Lock()
 				delete(uploadState.StatusMap, oneParams.Slug)
-				uploadState.Unlock()
 			}()
 
 			httpClient := http.Client{}
