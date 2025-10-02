@@ -18,13 +18,12 @@ import (
 
 type (
 	UploadState struct {
-		StatusMap map[string]UploadBookStatus
-		// sync.Mutex
+		StatusMap map[string]UploadBookStatus `json:"status_map"`
 	}
 
 	UploadBookStatus struct {
-		Slug      string
-		CreatedAt time.Time
+		Slug      string    `json:"slug"`
+		CreatedAt time.Time `json:"created_at"`
 	}
 )
 
