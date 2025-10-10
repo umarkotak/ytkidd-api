@@ -18,9 +18,14 @@ func GetUserStroke(w http.ResponseWriter, r *http.Request) {
 
 	commonCtx := common_ctx.GetFromCtx(ctx)
 
+	appSession := commonCtx.AppSession
+	if commonCtx.UserAuth.GUID != "" {
+		appSession = commonCtx.UserAuth.GUID
+	}
+
 	params := contract.GetUserStroke{
 		UserGuid:      commonCtx.UserAuth.GUID,
-		AppSession:    commonCtx.AppSession,
+		AppSession:    appSession,
 		BookContentID: utils.StringMustInt64(r.URL.Query().Get("book_content_id")),
 	}
 
@@ -41,9 +46,14 @@ func StoreUserStroke(w http.ResponseWriter, r *http.Request) {
 
 	commonCtx := common_ctx.GetFromCtx(ctx)
 
+	appSession := commonCtx.AppSession
+	if commonCtx.UserAuth.GUID != "" {
+		appSession = commonCtx.UserAuth.GUID
+	}
+
 	params := contract.StoreUserStroke{
 		UserGuid:   commonCtx.UserAuth.GUID,
-		AppSession: commonCtx.AppSession,
+		AppSession: appSession,
 	}
 	err = utils.BindJson(r, &params)
 	if err != nil {
